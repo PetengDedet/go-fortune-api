@@ -5,17 +5,26 @@ type PublicMenu struct {
 	Slug      string       `json:"slug"`
 	Type      string       `json:"type"`
 	Url       string       `json:"url"`
-	OrderNum  int          `json:"order_num"`
-	IsActive  int          `json:"is_active"`
+	OrderNum  int64        `json:"order_num"`
+	IsActive  int64        `json:"is_active"`
 	ChildMenu []PublicMenu `json:"child_menu"`
 }
 
-type Menu struct {
-	ID             int
+type ParentMenu struct {
+	ID             int64
 	Title          string
 	Slug           string
-	ParentMenuID   int
-	OrderNum       int
-	MenuPositionID int
+	OrderNum       int64
+	MenuPositionID int64
+	MenuType       string
+}
+
+type ChildrenMenu struct {
+	ID             int64
+	Title          string
+	Slug           string
+	ParentMenuID   int64
+	OrderNum       int64
+	MenuPositionID int64
 	MenuType       string
 }

@@ -1,55 +1,46 @@
 package application
 
 import (
+	"log"
+
 	"github.com/PetengDedet/fortune-post-api/domain/entity"
 	"github.com/PetengDedet/fortune-post-api/domain/repository"
 )
 
-type menuApp struct {
-	menuRepo repository.MenuRepository
+type MenuApp struct {
+	MenuRepo repository.MenuRepository
 }
 
-//MenuApp implements the MenuAppInterface
-var _ MenuAppInterface = &menuApp{}
-
-type MenuAppInterface interface {
-	GetMenuPositions() ([]entity.PublicMenuPosition, error)
-}
-
-func (app *menuApp) GetMenuPositions() ([]entity.PublicMenuPosition, error) {
-	menuPositions, err := app.menuRepo.GetMenuPositions()
+func (ma *MenuApp) GetPublicMenuPositions() ([]entity.PublicMenuPosition, error) {
+	menuPost, err := ma.MenuRepo.GetMenuPositions()
 	if err != nil {
-		return nil, err
+		panic(err.Error())
 	}
 
-	var menuPositionIds []int
-	for index, m := range menuPositions {
-		menuPositionIds[index] = int(m.ID)
+	var positionIds []int
+	for _, mp := range menuPost {
+		positionIds = append(positionIds, int(mp.ID))
 	}
 
-	menus, err := app.menuRepo.GetMenusByPositionIds(menuPositionIds)
+	log.Println("positionIds", positionIds)
+	parentMenus, err := ma.MenuRepo.GetMenusByPositionIds(positionIds)
 	if err != nil {
-		return nil, err
+		panic(err.Error())
 	}
 
-	var menuIds []int
-	for index, m := range menus {
-		menuIds[index] = m.ID
+	var parentMenuIds []int
+	for _, mp := range parentMenus {
+		parentMenuIds = append(parentMenuIds, int(mp.ID))
 	}
 
-	parentMenu, err := app.menuRepo.GetParentMenus(menuIds)
+	childrenMenus, err := ma.MenuRepo.GetChildrenMenus(parentMenuIds)
 	if err != nil {
-		return nil, err
+		panic(err.Error())
 	}
 
-	var menuPos []entity.PublicMenuPosition
-	// for index, mp := range menuPositions {
-	// 	// var parent *enti
-	// 	// for i, parent := range
-	// 	// menuPos[index] = entity.PublicMenuPosition{
-	// 	// 	Position: mp.Name,
-	// 	// }
-	// }
+	log.Println("menuPos", menuPost)
+	log.Println("parentMenus:", parentMenus)
+	log.Println("childrenMenus", childrenMenus)
 
-	return menuPos, nil
+	return nil, nil
 }

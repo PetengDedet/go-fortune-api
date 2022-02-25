@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/PetengDedet/fortune-post-api/application"
 	"github.com/PetengDedet/fortune-post-api/infrastructure/persistence/mysql"
 	"github.com/gin-gonic/gin"
 )
@@ -24,15 +25,26 @@ func Init() {
 	db_username := os.Getenv("MYSQL_USERNAME")
 	db_password := os.Getenv("MYSQL_PASSWORD")
 
-	services, err := mysql.NewRepositories(db_host, db_port, db_name, db_username, db_password)
+	db, err := mysql.GetConnection(db_host, db_port, db_name, db_username, db_password)
 	if err != nil {
 		panic(err)
 	}
-	defer services.Close()
+	defer db.Close()
 
-	menus := NewMenuHandler(services.MenuRepo)
-	route.GET("/menus", menus.GetMenuPositions)
+	menuRepo := mysql.MenuRepo{
+		DB: db,
+	}
+	menuApp := application.MenuApp{
+		MenuRepo: menuRepo,
+	}
 
-	//
+	route.GET("/menus", func(c *gin.Context) {
+		menuApp.GetPublicMenuPositions()
+
+		c.JSON(http.StatusOK, gin.H{
+			"oke": "oke",
+		})
+	})
+
 	route.Run(":8000")
 }
