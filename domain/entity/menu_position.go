@@ -1,5 +1,10 @@
 package entity
 
+import (
+	"os"
+	"strconv"
+)
+
 type MenuPosition struct {
 	ID   int64
 	Name string
@@ -23,33 +28,44 @@ func PublicMenuPositionResponse(mp MenuPosition, parentMenus []Menu, childrenMen
 						isActive = true
 					}
 
-					cm = append(cm, PublicMenuResponse(PublicMenu{
-						Name:       childMen.Title,
-						Slug:       childMen.Slug,
-						Type:       childMen.MenuType,
-						Url:        childMen.Slug,
-						OrderNum:   childMen.OrderNum,
-						LinkoutUrl: childMen.LinkoutUrl,
-						IsActive:   isActive,
-						ChildMenu:  []PublicMenu{},
-					}))
+					cm = append(cm, PublicMenuResponse(
+						PublicMenu{
+							Name:       childMen.Title,
+							Slug:       childMen.Slug,
+							Type:       childMen.MenuType,
+							Url:        childMen.Slug,
+							OrderNum:   childMen.OrderNum,
+							LinkoutUrl: childMen.LinkoutUrl,
+							IsActive:   isActive,
+							ChildMenu:  []PublicMenu{},
+						}))
 				}
 			}
 			isActive := false
 			if parMen.IsActive == 1 {
 				isActive = true
 			}
-			pm = append(pm, PublicMenuResponse(PublicMenu{
-				Name:       parMen.Title,
-				Slug:       parMen.Slug,
-				Type:       parMen.MenuType,
-				Url:        parMen.Slug,
-				OrderNum:   parMen.OrderNum,
-				LinkoutUrl: parMen.LinkoutUrl,
-				IsActive:   isActive,
-				ChildMenu:  cm,
-			}))
+			pm = append(pm, PublicMenuResponse(
+				PublicMenu{
+					Name:       parMen.Title,
+					Slug:       parMen.Slug,
+					Type:       parMen.MenuType,
+					Url:        parMen.Slug,
+					OrderNum:   parMen.OrderNum,
+					LinkoutUrl: parMen.LinkoutUrl,
+					IsActive:   isActive,
+					ChildMenu:  cm,
+				}))
 		}
+	}
+
+	if mp.Slug == "header" {
+		headerLimit, err := strconv.Atoi(os.Getenv("HEADER_MENU_LIMIT"))
+		if err != nil {
+			headerLimit = 9
+		}
+
+		pm = pm[:headerLimit]
 	}
 
 	return &PublicMenuPosition{

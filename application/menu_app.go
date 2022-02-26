@@ -1,8 +1,6 @@
 package application
 
 import (
-	"log"
-
 	"github.com/PetengDedet/fortune-post-api/domain/entity"
 	"github.com/PetengDedet/fortune-post-api/domain/repository"
 )
@@ -22,7 +20,6 @@ func (ma *MenuApp) GetPublicMenuPositions() []entity.PublicMenuPosition {
 		positionIds = append(positionIds, int(mp.ID))
 	}
 
-	log.Println("positionIds", positionIds)
 	parentMenus, err := ma.MenuRepo.GetMenusByPositionIds(positionIds)
 	if err != nil {
 		panic(err.Error())

@@ -9,7 +9,7 @@ type MenuRepo struct {
 	DB *sqlx.DB
 }
 
-func (menuRepo MenuRepo) GetMenuPositions() ([]entity.MenuPosition, error) {
+func (menuRepo *MenuRepo) GetMenuPositions() ([]entity.MenuPosition, error) {
 	query := `
 		SELECT 
 			mp.id,
@@ -25,7 +25,7 @@ func (menuRepo MenuRepo) GetMenuPositions() ([]entity.MenuPosition, error) {
 
 	var menuPositions []entity.MenuPosition
 	for rows.Next() {
-		var menuPosition entity.MenuPosition
+		menuPosition := &entity.MenuPosition{}
 		var id int64
 		var name string
 		var slug string
@@ -39,13 +39,13 @@ func (menuRepo MenuRepo) GetMenuPositions() ([]entity.MenuPosition, error) {
 		menuPosition.Name = name
 		menuPosition.Slug = slug
 
-		menuPositions = append(menuPositions, menuPosition)
+		menuPositions = append(menuPositions, *menuPosition)
 	}
 
 	return menuPositions, nil
 }
 
-func (menuRepo MenuRepo) GetMenusByPositionIds(positionIds []int) ([]entity.Menu, error) {
+func (menuRepo *MenuRepo) GetMenusByPositionIds(positionIds []int) ([]entity.Menu, error) {
 	query, args, err := sqlx.In(`
 		SELECT 
 			m.id,
@@ -114,7 +114,7 @@ func (menuRepo MenuRepo) GetMenusByPositionIds(positionIds []int) ([]entity.Menu
 	return menus, nil
 }
 
-func (menuRepo MenuRepo) GetChildrenMenus(menuIds []int) ([]entity.Menu, error) {
+func (menuRepo *MenuRepo) GetChildrenMenus(menuIds []int) ([]entity.Menu, error) {
 	query, args, err := sqlx.In(`
 		SELECT 
 			m.id,

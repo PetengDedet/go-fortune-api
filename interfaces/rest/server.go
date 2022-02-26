@@ -35,20 +35,12 @@ func Init() {
 		DB: db,
 	}
 	menuApp := application.MenuApp{
-		MenuRepo: menuRepo,
+		MenuRepo: &menuRepo,
 	}
 
 	v1 := route.Group("/v1")
 	{
-		v1.GET("/menu", func(c *gin.Context) {
-			publicMenuPosition := menuApp.GetPublicMenuPositions()
-
-			c.JSON(http.StatusOK, gin.H{
-				"data":    publicMenuPosition,
-				"status":  http.StatusOK,
-				"message": "success",
-			})
-		})
+		v1.GET("/menu", NewMenuHandler(menuApp).GetPublicMenuPositionsHandler)
 	}
 
 	route.Run(":8000")
