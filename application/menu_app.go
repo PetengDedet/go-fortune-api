@@ -11,7 +11,7 @@ type MenuApp struct {
 	MenuRepo repository.MenuRepository
 }
 
-func (ma *MenuApp) GetPublicMenuPositions() ([]entity.PublicMenuPosition, error) {
+func (ma *MenuApp) GetPublicMenuPositions() []entity.PublicMenuPosition {
 	menuPost, err := ma.MenuRepo.GetMenuPositions()
 	if err != nil {
 		panic(err.Error())
@@ -38,9 +38,10 @@ func (ma *MenuApp) GetPublicMenuPositions() ([]entity.PublicMenuPosition, error)
 		panic(err.Error())
 	}
 
-	log.Println("menuPos", menuPost)
-	log.Println("parentMenus:", parentMenus)
-	log.Println("childrenMenus", childrenMenus)
+	var publicMenuPositions []entity.PublicMenuPosition
+	for _, pmp := range menuPost {
+		publicMenuPositions = append(publicMenuPositions, *entity.PublicMenuPositionResponse(pmp, parentMenus, childrenMenus))
+	}
 
-	return nil, nil
+	return publicMenuPositions
 }

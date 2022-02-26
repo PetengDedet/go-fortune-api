@@ -38,13 +38,18 @@ func Init() {
 		MenuRepo: menuRepo,
 	}
 
-	route.GET("/menus", func(c *gin.Context) {
-		menuApp.GetPublicMenuPositions()
+	v1 := route.Group("/v1")
+	{
+		v1.GET("/menu", func(c *gin.Context) {
+			publicMenuPosition := menuApp.GetPublicMenuPositions()
 
-		c.JSON(http.StatusOK, gin.H{
-			"oke": "oke",
+			c.JSON(http.StatusOK, gin.H{
+				"data":    publicMenuPosition,
+				"status":  http.StatusOK,
+				"message": "success",
+			})
 		})
-	})
+	}
 
 	route.Run(":8000")
 }
