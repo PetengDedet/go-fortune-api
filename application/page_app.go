@@ -1,6 +1,7 @@
 package application
 
 import (
+	"github.com/PetengDedet/fortune-post-api/common"
 	"github.com/PetengDedet/fortune-post-api/domain/entity"
 	"github.com/PetengDedet/fortune-post-api/domain/repository"
 )
@@ -17,7 +18,7 @@ func (pageApp *PageApp) GetPageDetailBySlug(slug string) (*entity.Page, error) {
 
 	// Empty page
 	if page.ID == 0 {
-		return nil, nil
+		return nil, &common.NotFoundError{}
 	}
 
 	sections, err := pageApp.PageRepo.GetSectionsByPageId(page.ID)

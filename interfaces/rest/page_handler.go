@@ -1,9 +1,11 @@
 package rest
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/PetengDedet/fortune-post-api/application"
+	"github.com/PetengDedet/fortune-post-api/common"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,38 +23,14 @@ func (pageHandler *PageHandler) GetPageBySlugHandler(c *gin.Context) {
 	slug := c.Param("pageSlug")
 	pageDetail, err := pageHandler.PageApp.GetPageDetailBySlug(slug)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"status":  http.StatusInternalServerError,
-			"message": "failed",
-			"data":    nil,
-			"error": gin.H{
-				"message":          "Something went wrong",
-				"reason":           "internal_error",
-				"error_user_title": nil,
-				"error_user_msg":   "Something went wrong",
-			},
-		})
+		if errors.Is(&common.NotFoundError{}, err) {
+			c.JSON(http.StatusNotFound, NotFoundResponse(nil))
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
 		return
 	}
 
-	if pageDetail == nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"status":  http.StatusNotFound,
-			"message": "failed",
-			"data":    nil,
-			"error": gin.H{
-				"message":          "Page doesn't exist",
-				"reason":           "not_found",
-				"error_user_title": nil,
-				"error_user_msg":   "Page doesn't exist",
-			},
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"status":  http.StatusOK,
-		"message": "success",
-		"data":    pageDetail,
-	})
+	c.JSON(http.StatusOK, SuccessResponse(pageDetail))
 }
