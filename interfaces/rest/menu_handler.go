@@ -18,11 +18,11 @@ func NewMenuHandler(menuApp application.MenuApp) *MenuHandler {
 }
 
 func (menuHandler *MenuHandler) GetPublicMenuPositionsHandler(c *gin.Context) {
-	publicMenuPosition := menuHandler.MenuApp.GetPublicMenuPositions()
+	publicMenuPosition, err := menuHandler.MenuApp.GetPublicMenuPositions()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
+		return
+	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"data":    publicMenuPosition,
-		"status":  http.StatusOK,
-		"message": "success",
-	})
+	c.JSON(http.StatusOK, SuccessResponse(publicMenuPosition))
 }

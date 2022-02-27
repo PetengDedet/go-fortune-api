@@ -8,5 +8,6 @@ require (
 	github.com/guregu/null v4.0.0+incompatible // indirect
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/joho/godotenv v1.4.0
+	github.com/stretchr/testify v1.4.0
 	gopkg.in/guregu/null.v4 v4.0.0
 )

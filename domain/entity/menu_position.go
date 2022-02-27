@@ -65,11 +65,22 @@ func PublicMenuPositionResponse(mp MenuPosition, parentMenus []Menu, childrenMen
 			headerLimit = 9
 		}
 
-		pm = pm[:headerLimit]
+		if len(pm) >= headerLimit {
+			pm = pm[:headerLimit]
+		}
 	}
 
 	return &PublicMenuPosition{
 		Position: mp.Slug,
 		Menus:    pm,
 	}
+}
+
+func PublicMenuPositionsResponse(mp []MenuPosition, parentMenus []Menu, childrenMenus []Menu) []PublicMenuPosition {
+	var menuPositions []PublicMenuPosition
+	for _, pmp := range mp {
+		menuPositions = append(menuPositions, *PublicMenuPositionResponse(pmp, parentMenus, childrenMenus))
+	}
+
+	return menuPositions
 }

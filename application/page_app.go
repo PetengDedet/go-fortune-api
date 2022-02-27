@@ -6,9 +6,14 @@ import (
 	"github.com/PetengDedet/fortune-post-api/domain/repository"
 )
 
+type PageAppInterface interface {
+	GetPageDetailBySlug(slug string) (*entity.Page, error)
+}
 type PageApp struct {
 	PageRepo repository.PageRepository
 }
+
+// var _ PageAppInterface = &PageApp{}
 
 func (pageApp *PageApp) GetPageDetailBySlug(slug string) (*entity.Page, error) {
 	page, err := pageApp.PageRepo.GetPageBySlug(slug)

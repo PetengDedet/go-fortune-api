@@ -9,10 +9,16 @@ type MenuApp struct {
 	MenuRepo repository.MenuRepository
 }
 
-func (ma *MenuApp) GetPublicMenuPositions() []entity.PublicMenuPosition {
+func (ma *MenuApp) GetPublicMenuPositions() ([]entity.PublicMenuPosition, error) {
+	var menuPositions []entity.PublicMenuPosition
+
 	menuPost, err := ma.MenuRepo.GetMenuPositions()
 	if err != nil {
-		panic(err.Error())
+		return nil, err
+	}
+
+	if len(menuPost) == 0 {
+		return []entity.PublicMenuPosition{}, nil
 	}
 
 	var positionIds []int
@@ -22,7 +28,12 @@ func (ma *MenuApp) GetPublicMenuPositions() []entity.PublicMenuPosition {
 
 	parentMenus, err := ma.MenuRepo.GetMenusByPositionIds(positionIds)
 	if err != nil {
-		panic(err.Error())
+		return nil, err
+	}
+
+	// No Parent menus, just return the menu positions
+	if len(parentMenus) == 0 {
+		return entity.PublicMenuPositionsResponse(menuPost, nil, nil), nil
 	}
 
 	var parentMenuIds []int
@@ -32,13 +43,10 @@ func (ma *MenuApp) GetPublicMenuPositions() []entity.PublicMenuPosition {
 
 	childrenMenus, err := ma.MenuRepo.GetChildrenMenus(parentMenuIds)
 	if err != nil {
-		panic(err.Error())
+		return nil, err
 	}
 
-	var publicMenuPositions []entity.PublicMenuPosition
-	for _, pmp := range menuPost {
-		publicMenuPositions = append(publicMenuPositions, *entity.PublicMenuPositionResponse(pmp, parentMenus, childrenMenus))
-	}
+	menuPositions = entity.PublicMenuPositionsResponse(menuPost, parentMenus, childrenMenus)
 
-	return publicMenuPositions
+	return menuPositions, nil
 }
