@@ -31,16 +31,26 @@ func Init() {
 	}
 	defer db.Close()
 
+	// Repos
 	menuRepo := mysql.MenuRepo{
 		DB: db,
 	}
+	pageRepo := mysql.PageRepo{
+		DB: db,
+	}
+
+	// Apps
 	menuApp := application.MenuApp{
 		MenuRepo: &menuRepo,
+	}
+	pageApp := application.PageApp{
+		PageRepo: &pageRepo,
 	}
 
 	v1 := route.Group("/v1")
 	{
 		v1.GET("/menu", NewMenuHandler(menuApp).GetPublicMenuPositionsHandler)
+		v1.GET("/:pageSlug", NewPageHandler(pageApp).GetPageBySlugHandler)
 	}
 
 	route.Run(":8000")
