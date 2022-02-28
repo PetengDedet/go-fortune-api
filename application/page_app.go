@@ -10,7 +10,8 @@ type PageAppInterface interface {
 	GetPageDetailBySlug(slug string) (*entity.Page, error)
 }
 type PageApp struct {
-	PageRepo repository.PageRepository
+	PageRepo    repository.PageRepository
+	SectionRepo repository.SectionRepository
 }
 
 // var _ PageAppInterface = &PageApp{}
@@ -26,7 +27,7 @@ func (pageApp *PageApp) GetPageDetailBySlug(slug string) (*entity.Page, error) {
 		return nil, &common.NotFoundError{}
 	}
 
-	sections, err := pageApp.PageRepo.GetSectionsByPageId(page.ID)
+	sections, err := pageApp.SectionRepo.GetSectionsByPageId(page.ID)
 	if err != nil {
 		return nil, err
 	}
