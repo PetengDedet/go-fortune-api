@@ -18,6 +18,7 @@ type PublicMenuPosition struct {
 
 func PublicMenuPositionResponse(mp MenuPosition, parentMenus []Menu, childrenMenus []Menu) *PublicMenuPosition {
 	var pm []PublicMenu
+	var publicMenus []PublicMenu
 	for _, parMen := range parentMenus {
 		if parMen.MenuPositionID == mp.ID {
 			var cm []PublicMenu
@@ -66,7 +67,16 @@ func PublicMenuPositionResponse(mp MenuPosition, parentMenus []Menu, childrenMen
 		}
 
 		if len(pm) >= headerLimit {
-			pm = pm[:headerLimit]
+			pm := pm[:headerLimit]
+			// moreMenus := pm[headerLimit:]
+			pm = append(pm, PublicMenuResponse(
+				PublicMenu{
+					Name:     "MORE",
+					Slug:     "more",
+					OrderNum: int64(headerLimit) + 1,
+					IsActive: true,
+					// ChildMenu: moreMenus,
+				}))
 		}
 	}
 
