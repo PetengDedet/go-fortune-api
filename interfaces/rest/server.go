@@ -35,34 +35,34 @@ func Init() {
 	menuRepo := mysql.MenuRepo{
 		DB: db,
 	}
-	pageRepo := mysql.PageRepo{
-		DB: db,
-	}
-	sectionRepo := mysql.SectionRepo{
-		DB: db,
-	}
-	categoryRepo := mysql.CategoryRepo{
-		DB: db,
-	}
+	// pageRepo := mysql.PageRepo{
+	// 	DB: db,
+	// }
+	// sectionRepo := mysql.SectionRepo{
+	// 	DB: db,
+	// }
+	// categoryRepo := mysql.CategoryRepo{
+	// 	DB: db,
+	// }
 
 	// Apps
 	menuApp := application.MenuApp{
 		MenuRepo: &menuRepo,
 	}
-	pageApp := application.PageApp{
-		PageRepo:    &pageRepo,
-		SectionRepo: &sectionRepo,
-	}
-	categoryApp := application.CategoryApp{
-		CategoryRepo: &categoryRepo,
-		SectionRepo:  &sectionRepo,
-	}
+	// pageApp := application.PageApp{
+	// 	PageRepo:    &pageRepo,
+	// 	SectionRepo: &sectionRepo,
+	// }
+	// categoryApp := application.CategoryApp{
+	// 	CategoryRepo: &categoryRepo,
+	// 	SectionRepo:  &sectionRepo,
+	// }
 
 	v1 := route.Group("/v1")
 	{
 		v1.GET("/menu", NewMenuHandler(menuApp).GetPublicMenuPositionsHandler)
-		v1.GET("/:pageSlug", NewPageHandler(pageApp).GetPageBySlugHandler)
-		v1.GET("/category/:categorySlug", NewCategoryHandler(categoryApp).GetCategoryPageDetailHandler)
+		// v1.GET("/:pageSlug", NewPageHandler(pageApp).GetPageBySlugHandler)
+		// v1.GET("/category/:categorySlug", NewCategoryHandler(categoryApp).GetCategoryPageDetailHandler)
 	}
 
 	route.Run(":8000")

@@ -1,6 +1,8 @@
 package application
 
 import (
+	"log"
+
 	"github.com/PetengDedet/fortune-post-api/domain/entity"
 	"github.com/PetengDedet/fortune-post-api/domain/repository"
 )
@@ -31,22 +33,23 @@ func (ma *MenuApp) GetPublicMenuPositions() ([]entity.PublicMenuPosition, error)
 		return nil, err
 	}
 
+	log.Println(parentMenus)
 	// No Parent menus, just return the menu positions
-	if len(parentMenus) == 0 {
-		return entity.PublicMenuPositionsResponse(menuPost, nil, nil), nil
-	}
+	// if len(parentMenus) == 0 {
+	// 	return entity.PublicMenuPositionsResponse(menuPost, nil, nil), nil
+	// }
 
-	var parentMenuIds []int
-	for _, mp := range parentMenus {
-		parentMenuIds = append(parentMenuIds, int(mp.ID))
-	}
+	// var parentMenuIds []int
+	// for _, mp := range parentMenus {
+	// 	parentMenuIds = append(parentMenuIds, int(mp.ID))
+	// }
 
-	childrenMenus, err := ma.MenuRepo.GetChildrenMenus(parentMenuIds)
-	if err != nil {
-		return nil, err
-	}
+	// childrenMenus, err := ma.MenuRepo.GetChildrenMenus(parentMenuIds)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	menuPositions = entity.PublicMenuPositionsResponse(menuPost, parentMenus, childrenMenus)
+	// menuPositions = entity.PublicMenuPositionsResponse(menuPost, parentMenus, childrenMenus)
 
 	return menuPositions, nil
 }

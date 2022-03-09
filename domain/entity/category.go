@@ -9,7 +9,7 @@ type Category struct {
 	MetaTitle       null.String `json:"meta_title" db:"meta_title"`
 	MetaDescription null.String `json:"meta_description" db:"meta_description"`
 
-	ID              int64    `json:"-" db:"id"`
+	ID              null.Int `json:"-" db:"id"`
 	GeneralStatusID int64    `json:"-" db:"general_status_id"`
 	MediaID         null.Int `json:"-" db:"media_id"`
 
