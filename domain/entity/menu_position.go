@@ -1,14 +1,22 @@
 package entity
 
 type MenuPosition struct {
-	ID   int64
-	Name string
-	Slug string
+	ID       int64  `json:"-"`
+	Name     string `json:"-"`
+	Position string `json:"position"`
+	Slug     string `json:"-"`
+	Menus    []Menu `json:"menus"`
 }
 
-type PublicMenuPosition struct {
-	Position string `json:"position"`
-	// Menus    []PublicMenu `json:"menus"`
+func (menuPosition *MenuPosition) GetMenus(menus []Menu) []Menu {
+	var mns []Menu
+	for _, m := range menus {
+		if m.MenuPositionID == menuPosition.ID {
+			mns = append(mns, m)
+		}
+	}
+
+	return mns
 }
 
 // func PublicMenuPositionResponse(mp MenuPosition, parentMenus []Menu, childrenMenus []Menu) *PublicMenuPosition {

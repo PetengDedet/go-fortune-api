@@ -35,19 +35,29 @@ func Init() {
 	menuRepo := mysql.MenuRepo{
 		DB: db,
 	}
-	// pageRepo := mysql.PageRepo{
-	// 	DB: db,
-	// }
+	pageRepo := mysql.PageRepo{
+		DB: db,
+	}
 	// sectionRepo := mysql.SectionRepo{
 	// 	DB: db,
 	// }
-	// categoryRepo := mysql.CategoryRepo{
-	// 	DB: db,
-	// }
+	categoryRepo := mysql.CategoryRepo{
+		DB: db,
+	}
+	rankRepo := mysql.RankRepo{
+		DB: db,
+	}
+	linkoutRepo := mysql.LinkoutRepo{
+		DB: db,
+	}
 
 	// Apps
 	menuApp := application.MenuApp{
-		MenuRepo: &menuRepo,
+		MenuRepo:     &menuRepo,
+		PageRepo:     &pageRepo,
+		CategoryRepo: &categoryRepo,
+		RankRepo:     &rankRepo,
+		LinkoutRepo:  &linkoutRepo,
 	}
 	// pageApp := application.PageApp{
 	// 	PageRepo:    &pageRepo,

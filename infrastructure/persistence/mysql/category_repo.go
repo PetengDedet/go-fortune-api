@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"github.com/PetengDedet/fortune-post-api/domain/entity"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -46,3 +47,50 @@ type CategoryRepo struct {
 
 // 	return category, nil
 // }
+
+func (categoryRepo *CategoryRepo) GetCategoriesByIds(categoryIds []int64) ([]entity.Category, error) {
+	if len(categoryIds) == 0 {
+		return nil, nil
+	}
+
+	query, args, err := sqlx.In(`
+		SELECT
+			id,
+			name,
+			slug,
+			excerpt,
+			meta_title,
+			meta_description
+		FROM categories
+		WHERE id IN(?)
+	`, categoryIds)
+
+	if err != nil {
+		return nil, err
+	}
+
+	query = categoryRepo.DB.Rebind(query)
+	rows, err := categoryRepo.DB.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	var categories []entity.Category
+	for rows.Next() {
+		var category entity.Category
+		err := rows.Scan(
+			&category.ID,
+			&category.Name,
+			&category.Slug,
+			&category.Excerpt,
+			&category.MetaTitle,
+			&category.MetaDescription,
+		)
+		if err != nil {
+			return nil, err
+		}
+		categories = append(categories, category)
+	}
+
+	return categories, nil
+}
