@@ -51,20 +51,20 @@ func (ma *MenuApp) GetPublicMenuPositions() ([]entity.MenuPosition, error) {
 		return nil, err
 	}
 
-	catIds, loIds, pageIds, rankIds = getMenuRelationIds(childrenMenus)
+	cIds, lIds, pIds, rkIds := getMenuRelationIds(childrenMenus)
 	childrenMenus = mapMenuType(
 		ma,
 		childrenMenus,
-		catIds,
-		loIds,
-		pageIds,
-		rankIds,
+		cIds,
+		lIds,
+		pIds,
+		rkIds,
 	)
 
 	parentMenus = mapChildMenusToParentMenus(parentMenus, childrenMenus)
 
 	for _, mp := range menuPost {
-		mp.Menus = mp.GetMenus(parentMenus)
+		mp.GetMenus(parentMenus)
 		mp.Position = strings.ToLower(mp.Position)
 		menuPositions = append(menuPositions, mp)
 	}
@@ -175,6 +175,8 @@ func mapMenuType(ma *MenuApp, menus []entity.Menu, catIds, loIds, pageIds, rankI
 			}
 			continue
 		}
+
+		menus[index] = *m.ClassifyMenu()
 	}
 
 	return menus
@@ -182,8 +184,7 @@ func mapMenuType(ma *MenuApp, menus []entity.Menu, catIds, loIds, pageIds, rankI
 
 func mapChildMenusToParentMenus(parent, childs []entity.Menu) []entity.Menu {
 	for index, p := range parent {
-		clds := p.GetChildMenus(childs)
-		parent[index].ChildMenu = *&clds
+		parent[index].ChildMenu = p.GetChildMenus(childs)
 	}
 
 	return parent

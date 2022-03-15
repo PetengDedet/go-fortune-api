@@ -1,5 +1,12 @@
 package entity
 
+import (
+	"os"
+	"strconv"
+
+	"gopkg.in/guregu/null.v4"
+)
+
 type MenuPosition struct {
 	ID       int64  `json:"-"`
 	Name     string `json:"-"`
@@ -8,7 +15,7 @@ type MenuPosition struct {
 	Menus    []Menu `json:"menus"`
 }
 
-func (menuPosition *MenuPosition) GetMenus(menus []Menu) []Menu {
+func (menuPosition *MenuPosition) GetMenus(menus []Menu) *MenuPosition {
 	var mns []Menu
 	for _, m := range menus {
 		if m.MenuPositionID == menuPosition.ID {
@@ -16,84 +23,28 @@ func (menuPosition *MenuPosition) GetMenus(menus []Menu) []Menu {
 		}
 	}
 
-	return mns
+	if menuPosition.Slug == "header" {
+		headerLimit, err := strconv.Atoi(os.Getenv("HEADER_MENU_LIMIT"))
+		if err != nil {
+			headerLimit = 9
+		}
+
+		if len(mns) > headerLimit {
+			tmpMenus := mns
+			moreChildMenus := tmpMenus[headerLimit:]
+			moreMenu := Menu{
+				Name:      null.StringFrom("MORE"),
+				Slug:      null.StringFrom("more"),
+				OrderNum:  int64(headerLimit) + 1,
+				IsActive:  true,
+				ChildMenu: moreChildMenus,
+			}
+
+			mns = mns[:headerLimit]
+			mns = append(mns, moreMenu)
+		}
+	}
+	menuPosition.Menus = mns
+
+	return menuPosition
 }
-
-// func PublicMenuPositionResponse(mp MenuPosition, parentMenus []Menu, childrenMenus []Menu) *PublicMenuPosition {
-// 	var pm []PublicMenu
-// 	var publicMenus []PublicMenu
-// 	for _, parMen := range parentMenus {
-// 		if parMen.MenuPositionID == mp.ID {
-// 			var cm []PublicMenu
-// 			for _, childMen := range childrenMenus {
-// 				if childMen.ParentMenuID == parMen.ID {
-// 					isActive := false
-// 					if childMen.IsActive == 1 {
-// 						isActive = true
-// 					}
-
-// 					cm = append(cm, PublicMenuResponse(
-// 						PublicMenu{
-// 							Name:       childMen.Title,
-// 							Slug:       childMen.Slug,
-// 							Type:       childMen.MenuType,
-// 							Url:        childMen.Slug,
-// 							OrderNum:   childMen.OrderNum,
-// 							LinkoutUrl: childMen.LinkoutUrl,
-// 							IsActive:   isActive,
-// 							ChildMenu:  []PublicMenu{},
-// 						}))
-// 				}
-// 			}
-// 			isActive := false
-// 			if parMen.IsActive == 1 {
-// 				isActive = true
-// 			}
-// 			pm = append(pm, PublicMenuResponse(
-// 				PublicMenu{
-// 					Name:       parMen.Title,
-// 					Slug:       parMen.Slug,
-// 					Type:       parMen.MenuType,
-// 					Url:        parMen.Slug,
-// 					OrderNum:   parMen.OrderNum,
-// 					LinkoutUrl: parMen.LinkoutUrl,
-// 					IsActive:   isActive,
-// 					ChildMenu:  cm,
-// 				}))
-// 		}
-// 	}
-
-// 	if mp.Slug == "header" {
-// 		headerLimit, err := strconv.Atoi(os.Getenv("HEADER_MENU_LIMIT"))
-// 		if err != nil {
-// 			headerLimit = 9
-// 		}
-
-// 		if len(pm) >= headerLimit {
-// 			pm := pm[:headerLimit]
-// 			// moreMenus := pm[headerLimit:]
-// 			pm = append(pm, PublicMenuResponse(
-// 				PublicMenu{
-// 					Name:     "MORE",
-// 					Slug:     "more",
-// 					OrderNum: int64(headerLimit) + 1,
-// 					IsActive: true,
-// 					// ChildMenu: moreMenus,
-// 				}))
-// 		}
-// 	}
-
-// 	return &PublicMenuPosition{
-// 		Position: mp.Slug,
-// 		Menus:    pm,
-// 	}
-// }
-
-// func PublicMenuPositionsResponse(mp []MenuPosition, parentMenus []Menu, childrenMenus []Menu) []PublicMenuPosition {
-// 	var menuPositions []PublicMenuPosition
-// 	for _, pmp := range mp {
-// 		menuPositions = append(menuPositions, *PublicMenuPositionResponse(pmp, parentMenus, childrenMenus))
-// 	}
-
-// 	return menuPositions
-// }

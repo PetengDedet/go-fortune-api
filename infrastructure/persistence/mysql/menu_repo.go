@@ -57,6 +57,7 @@ func (menuRepo *MenuRepo) GetMenusByPositionIds(positionIds []int) ([]entity.Men
 		WHERE ISNULL(m.parent_menu_id)
 			AND m.menu_position_id IN(?)
 			AND m.general_status_id = ?
+		ORDER BY order_num ASC
 	`, positionIds, 1)
 
 	if err != nil {
@@ -76,7 +77,7 @@ func (menuRepo *MenuRepo) GetMenusByPositionIds(positionIds []int) ([]entity.Men
 			&menu.ID,
 			&menu.Name,
 			&menu.Slug,
-			&menu.OrdeNum,
+			&menu.OrderNum,
 			&menu.MenuPositionID,
 			&menu.TableID,
 			&menu.TableName,
@@ -102,11 +103,13 @@ func (menuRepo *MenuRepo) GetChildrenMenus(menuIds []int) ([]entity.Menu, error)
 			m.menu_position_id,
 			m.table_id,
 			m.table_name,
-			m.general_status_id
+			m.general_status_id,
+			m.parent_menu_id
 			
 		FROM menus m
 		WHERE m.parent_menu_id IN(?)
 			AND m.general_status_id = ?
+		ORDER BY m.order_num ASC
 	`, menuIds, 1)
 
 	if err != nil {
@@ -126,11 +129,12 @@ func (menuRepo *MenuRepo) GetChildrenMenus(menuIds []int) ([]entity.Menu, error)
 			&menu.ID,
 			&menu.Name,
 			&menu.Slug,
-			&menu.OrdeNum,
+			&menu.OrderNum,
 			&menu.MenuPositionID,
 			&menu.TableID,
 			&menu.TableName,
 			&menu.GeneralStatusID,
+			&menu.ParentMenuId,
 		)
 		if err != nil {
 			return nil, err

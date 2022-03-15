@@ -1,6 +1,10 @@
 package entity
 
-import "gopkg.in/guregu/null.v4"
+import (
+	"log"
+
+	"gopkg.in/guregu/null.v4"
+)
 
 type Menu struct {
 	ID        int64       `json:"-"`
@@ -8,9 +12,9 @@ type Menu struct {
 	Slug      null.String `json:"slug"`
 	Type      null.String `json:"type"`
 	Url       null.String `json:"url"`
-	OrdeNum   int64       `json:"order_num"`
+	OrderNum  int64       `json:"order_num"`
 	IsActive  bool        `json:"is_active"`
-	ChildMenu []Menu      `json:"child_menu"`
+	ChildMenu []Menu      `json:"child_menu,omitempty"`
 
 	Title           null.String `json:"-"`
 	MenuPositionID  int64       `json:"-"`
@@ -26,6 +30,16 @@ type Menu struct {
 }
 
 func (m *Menu) ClassifyMenu() *Menu {
+
+	if m.TableName.String == "ranks" {
+		m.Type = null.StringFrom("rank")
+		log.Println(m.Slug)
+	}
+
+	if m.GeneralStatusID == 1 {
+		m.IsActive = true
+	}
+
 	if m.Category != nil {
 		m.Type = null.StringFrom("category")
 		m.Url = null.StringFrom("/" + m.Slug.String)
@@ -48,7 +62,6 @@ func (m *Menu) ClassifyMenu() *Menu {
 	}
 
 	if m.Rank != nil {
-		m.Type = null.StringFrom("rank")
 		m.Url = null.StringFrom("/" + m.Rank.Slug)
 
 		return m
@@ -63,6 +76,9 @@ func (m *Menu) GetChildMenus(childrens []Menu) []Menu {
 		if c.ParentMenuId.Int64 == m.ID {
 			childs = append(childs, c)
 		}
+	}
+	if len(childs) == 0 {
+		childs = []Menu{}
 	}
 
 	return childs
