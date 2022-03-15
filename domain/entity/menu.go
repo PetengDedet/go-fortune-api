@@ -14,7 +14,7 @@ type Menu struct {
 	Url       null.String `json:"url"`
 	OrderNum  int64       `json:"order_num"`
 	IsActive  bool        `json:"is_active"`
-	ChildMenu []Menu      `json:"child_menu,omitempty"`
+	ChildMenu []Menu      `json:"child_menu"`
 
 	Title           null.String `json:"-"`
 	MenuPositionID  int64       `json:"-"`
