@@ -1,49 +1,41 @@
 package application
 
-import (
-	"log"
+// type CategoryAppInterface interface {
+// 	GetCategoryPageDetailBySlug(slug string) (*entity.CategoryPage, error)
+// }
 
-	"github.com/PetengDedet/fortune-post-api/common"
-	"github.com/PetengDedet/fortune-post-api/domain/entity"
-	"github.com/PetengDedet/fortune-post-api/domain/repository"
-)
+// type CategoryApp struct {
+// 	CategoryRepo repository.CategoryRepository
+// 	SectionRepo  repository.SectionRepository
+// }
 
-type CategoryAppInterface interface {
-	GetCategoryPageDetailBySlug(slug string) (*entity.CategoryPage, error)
-}
+// func (categoryApp *CategoryApp) GetCategoryPageDetailBySlug(slug string) (*entity.CategoryPage, error) {
+// 	category, err := categoryApp.CategoryRepo.GetCategoryPageBySlug(slug)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-type CategoryApp struct {
-	CategoryRepo repository.CategoryRepository
-	SectionRepo  repository.SectionRepository
-}
+// 	// Category not found
+// 	if category.ID == 0 {
+// 		return nil, &common.NotFoundError{}
+// 	}
 
-func (categoryApp *CategoryApp) GetCategoryPageDetailBySlug(slug string) (*entity.CategoryPage, error) {
-	category, err := categoryApp.CategoryRepo.GetCategoryPageBySlug(slug)
-	if err != nil {
-		return nil, err
-	}
+// 	sections, err := categoryApp.SectionRepo.GetSectionsByPageSlug("category")
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	// Category not found
-	if category.ID == 0 {
-		return nil, &common.NotFoundError{}
-	}
+// 	log.Println("Sectionsss", sections)
 
-	sections, err := categoryApp.SectionRepo.GetSectionsByPageSlug("category")
-	if err != nil {
-		return nil, err
-	}
+// 	var ss []entity.Section
+// 	for _, s := range sections {
+// 		ss = append(ss, *entity.SectionResponse(&s))
+// 	}
+// 	category.Sections = ss
 
-	log.Println("Sectionsss", sections)
+// 	if len(ss) <= 0 {
+// 		category.Sections = []entity.Section{}
+// 	}
 
-	var ss []entity.Section
-	for _, s := range sections {
-		ss = append(ss, *entity.SectionResponse(&s))
-	}
-	category.Sections = ss
-
-	if len(ss) <= 0 {
-		category.Sections = []entity.Section{}
-	}
-
-	return category, nil
-}
+// 	return category, nil
+// }

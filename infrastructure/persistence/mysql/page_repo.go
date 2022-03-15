@@ -53,3 +53,54 @@ func (pageRepo *PageRepo) GetPageBySlug(slug string) (*entity.Page, error) {
 
 	return page, nil
 }
+
+func (pageRepo *PageRepo) GetPagesByIds(pageIds []int64) ([]entity.Page, error) {
+	if len(pageIds) == 0 {
+		return nil, nil
+	}
+
+	query, args, err := sqlx.In(`
+		SELECT
+			id,
+			name,
+			slug,
+			excerpt,
+			url,
+			description,
+			meta_title,
+			meta_description
+		FROM pages
+		WHERE id IN(?)
+	`, pageIds)
+
+	if err != nil {
+		return nil, err
+	}
+
+	query = pageRepo.DB.Rebind(query)
+	rows, err := pageRepo.DB.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	var pages []entity.Page
+	for rows.Next() {
+		var page entity.Page
+		err := rows.Scan(
+			&page.ID,
+			&page.Name,
+			&page.Slug,
+			&page.Excerpt,
+			&page.Url,
+			&page.Description,
+			&page.MetaTitle,
+			&page.MetaDescription,
+		)
+		if err != nil {
+			return nil, err
+		}
+		pages = append(pages, page)
+	}
+
+	return pages, nil
+}

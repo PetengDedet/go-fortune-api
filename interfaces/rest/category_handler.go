@@ -1,36 +1,27 @@
 package rest
 
-import (
-	"errors"
-	"net/http"
+// type CategoryHandler struct {
+// 	CategoryApp application.CategoryApp
+// }
 
-	"github.com/PetengDedet/fortune-post-api/application"
-	"github.com/PetengDedet/fortune-post-api/common"
-	"github.com/gin-gonic/gin"
-)
+// func NewCategoryHandler(categoryApp application.CategoryApp) *CategoryHandler {
+// 	return &CategoryHandler{
+// 		CategoryApp: categoryApp,
+// 	}
+// }
 
-type CategoryHandler struct {
-	CategoryApp application.CategoryApp
-}
+// func (handler *CategoryHandler) GetCategoryPageDetailHandler(c *gin.Context) {
+// 	slug := c.Param("categorySlug")
+// 	category, err := handler.CategoryApp.GetCategoryPageDetailBySlug(slug)
+// 	if err != nil {
+// 		if errors.Is(err, &common.NotFoundError{}) {
+// 			c.JSON(http.StatusNotFound, NotFoundResponse(nil))
+// 			return
+// 		}
 
-func NewCategoryHandler(categoryApp application.CategoryApp) *CategoryHandler {
-	return &CategoryHandler{
-		CategoryApp: categoryApp,
-	}
-}
+// 		c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
+// 		return
+// 	}
 
-func (handler *CategoryHandler) GetCategoryPageDetailHandler(c *gin.Context) {
-	slug := c.Param("categorySlug")
-	category, err := handler.CategoryApp.GetCategoryPageDetailBySlug(slug)
-	if err != nil {
-		if errors.Is(err, &common.NotFoundError{}) {
-			c.JSON(http.StatusNotFound, NotFoundResponse(nil))
-			return
-		}
-
-		c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
-		return
-	}
-
-	c.JSON(http.StatusOK, SuccessResponse(category))
-}
+// 	c.JSON(http.StatusOK, SuccessResponse(category))
+// }

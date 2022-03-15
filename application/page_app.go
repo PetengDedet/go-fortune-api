@@ -42,5 +42,6 @@ func (pageApp *PageApp) GetPageDetailBySlug(slug string) (*entity.Page, error) {
 		page.Sections = []entity.Section{}
 	}
 
-	return entity.PageResponse(page), nil
+	// return entity.PageResponse(page), nil
+	return nil, nil
 }

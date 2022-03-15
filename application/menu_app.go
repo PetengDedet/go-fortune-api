@@ -1,16 +1,22 @@
 package application
 
 import (
+	"strings"
+
 	"github.com/PetengDedet/fortune-post-api/domain/entity"
 	"github.com/PetengDedet/fortune-post-api/domain/repository"
 )
 
 type MenuApp struct {
-	MenuRepo repository.MenuRepository
+	MenuRepo     repository.MenuRepository
+	CategoryRepo repository.CategoryRepository
+	PageRepo     repository.PageRepository
+	LinkoutRepo  repository.LinkoutRepository
+	RankRepo     repository.RankRepository
 }
 
-func (ma *MenuApp) GetPublicMenuPositions() ([]entity.PublicMenuPosition, error) {
-	var menuPositions []entity.PublicMenuPosition
+func (ma *MenuApp) GetPublicMenuPositions() ([]entity.MenuPosition, error) {
+	var menuPositions []entity.MenuPosition
 
 	menuPost, err := ma.MenuRepo.GetMenuPositions()
 	if err != nil {
@@ -18,35 +24,168 @@ func (ma *MenuApp) GetPublicMenuPositions() ([]entity.PublicMenuPosition, error)
 	}
 
 	if len(menuPost) == 0 {
-		return []entity.PublicMenuPosition{}, nil
+		return []entity.MenuPosition{}, nil
 	}
 
-	var positionIds []int
-	for _, mp := range menuPost {
-		positionIds = append(positionIds, int(mp.ID))
-	}
+	positionIds := getMenuPositionIds(menuPost)
 
 	parentMenus, err := ma.MenuRepo.GetMenusByPositionIds(positionIds)
 	if err != nil {
 		return nil, err
 	}
+	//TODO: if no parent menus, return menupositions without menu
 
-	// No Parent menus, just return the menu positions
-	if len(parentMenus) == 0 {
-		return entity.PublicMenuPositionsResponse(menuPost, nil, nil), nil
-	}
+	catIds, loIds, pageIds, rankIds := getMenuRelationIds(parentMenus)
+	parentMenus = mapMenuType(
+		ma,
+		parentMenus,
+		catIds,
+		loIds,
+		pageIds,
+		rankIds,
+	)
 
-	var parentMenuIds []int
-	for _, mp := range parentMenus {
-		parentMenuIds = append(parentMenuIds, int(mp.ID))
-	}
-
+	parentMenuIds := getParentMenuIds(parentMenus)
 	childrenMenus, err := ma.MenuRepo.GetChildrenMenus(parentMenuIds)
 	if err != nil {
 		return nil, err
 	}
 
-	menuPositions = entity.PublicMenuPositionsResponse(menuPost, parentMenus, childrenMenus)
+	cIds, lIds, pIds, rkIds := getMenuRelationIds(childrenMenus)
+	childrenMenus = mapMenuType(
+		ma,
+		childrenMenus,
+		cIds,
+		lIds,
+		pIds,
+		rkIds,
+	)
+
+	parentMenus = mapChildMenusToParentMenus(parentMenus, childrenMenus)
+
+	for _, mp := range menuPost {
+		mp.GetMenus(parentMenus)
+		mp.Position = strings.ToLower(mp.Position)
+		menuPositions = append(menuPositions, mp)
+	}
 
 	return menuPositions, nil
+}
+
+func getMenuPositionIds(mp []entity.MenuPosition) (positionIds []int) {
+	for _, mp := range mp {
+		positionIds = append(positionIds, int(mp.ID))
+	}
+
+	return positionIds
+}
+
+func getParentMenuIds(pm []entity.Menu) (parentMenuIds []int) {
+	for _, pm := range pm {
+		parentMenuIds = append(parentMenuIds, int(pm.ID))
+	}
+
+	return parentMenuIds
+}
+
+func getMenuRelationIds(m []entity.Menu) (catIds, loIds, pageIds, rankIds []int64) {
+	for _, m := range m {
+		if m.TableName.String == "categories" && m.TableID.Int64 != 0 {
+			catIds = append(catIds, m.TableID.Int64)
+		}
+
+		if m.TableName.String == "linkouts" && m.TableID.Int64 != 0 {
+			loIds = append(loIds, m.TableID.Int64)
+		}
+
+		if m.TableName.String == "pages" && m.TableID.Int64 != 0 {
+			pageIds = append(pageIds, m.TableID.Int64)
+		}
+
+		if m.TableName.String == "ranks" && m.TableID.Int64 != 0 {
+			rankIds = append(rankIds, m.TableID.Int64)
+		}
+	}
+
+	return catIds, loIds, pageIds, rankIds
+}
+
+func mapMenuType(ma *MenuApp, menus []entity.Menu, catIds, loIds, pageIds, rankIds []int64) []entity.Menu {
+	categories, err := ma.CategoryRepo.GetCategoriesByIds(catIds)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	linkouts, err := ma.LinkoutRepo.GetLinkoutsByIds(loIds)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	pages, err := ma.PageRepo.GetPagesByIds(pageIds)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	ranks, err := ma.RankRepo.GetRanksByIds(rankIds)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	for index, m := range menus {
+		if m.TableName.String == "categories" && m.TableID.Int64 != 0 {
+			for _, cat := range categories {
+				if cat.ID.Int64 == m.TableID.Int64 {
+					m.Category = &cat
+					menus[index] = *m.ClassifyMenu()
+					break
+				}
+			}
+			continue
+		}
+
+		if m.TableName.String == "linkouts" && m.TableID.Int64 != 0 {
+			for _, lo := range linkouts {
+				if lo.ID == m.TableID.Int64 {
+					m.Linkout = &lo
+					menus[index] = *m.ClassifyMenu()
+					break
+				}
+			}
+			continue
+		}
+
+		if m.TableName.String == "pages" && m.TableID.Int64 != 0 {
+			for _, pg := range pages {
+				if pg.ID == m.TableID.Int64 {
+					m.Page = &pg
+					menus[index] = *m.ClassifyMenu()
+					break
+				}
+			}
+			continue
+		}
+
+		if m.TableName.String == "ranks" && m.TableID.Int64 != 0 {
+			for _, rk := range ranks {
+				if rk.ID == m.TableID.Int64 {
+					m.Rank = &rk
+					menus[index] = *m.ClassifyMenu()
+					break
+				}
+			}
+			continue
+		}
+
+		menus[index] = *m.ClassifyMenu()
+	}
+
+	return menus
+}
+
+func mapChildMenusToParentMenus(parent, childs []entity.Menu) []entity.Menu {
+	for index, p := range parent {
+		parent[index].ChildMenu = p.GetChildMenus(childs)
+	}
+
+	return parent
 }

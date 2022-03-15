@@ -2,17 +2,10 @@ package entity
 
 import "gopkg.in/guregu/null.v4"
 
-type Page struct {
-	Slug            null.String `json:"slug" db:"slug"`
-	Excerpt         null.String `json:"excerpt" db:"excerpt"`
-	Description     null.String `json:"description" db:"description"`
-	Url             null.String `json:"url" db:"url"`
-	MetaTitle       null.String `json:"meta_title" db:"meta_title"`
-	MetaDescription null.String `json:"meta_description" db:"meta_description"`
-
-	Page          null.String `json:"page" db:="-"`
-	ArticleCounts int64       `json:"article_counts" db:"-"`
-	Sections      []Section   `json:"sections" db:"-"`
+type Rank struct {
+	Slug        string      `json:"slug" db:"slug"`
+	Title       null.String `json:"title" db:"title"`
+	Description null.String `json:"description" db:"description"`
 
 	ID              int64       `json:"-" db:"id"`
 	MediaID         null.Int    `json:"-" db:"media_id"`

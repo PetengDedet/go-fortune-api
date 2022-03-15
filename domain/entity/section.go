@@ -17,6 +17,7 @@ type Section struct {
 
 	TableName            null.String `json:"-"`
 	TableID              null.Int    `json:"-"`
+	TableUrl             null.String `json:"-"`
 	Slug                 null.String `json:"-"`
 	MediaID              null.String `json:"-"`
 	PageSectionID        null.Int    `json:"-"`
@@ -24,8 +25,10 @@ type Section struct {
 	PageSectionSectionID null.Int    `json:"-"`
 	CategoryName         null.String `json:"-"`
 	CategorySlug         null.String `json:"-"`
+	CategoryUrl          null.String `json:"-"`
 	TagName              null.String `json:"-"`
 	TagSlug              null.String `json:"-"`
+	TagUrl               null.String `json:"-"`
 	PostTypeName         null.String `json:"-"`
 	PostTypeSlug         null.String `json:"-"`
 	LinkoutUrl           null.String `json:"-"`
@@ -35,42 +38,49 @@ type Section struct {
 	RankCategoryName     null.String `json:"-"`
 	RankCategorySlug     null.String `json:"-"`
 	UserUsername         null.String `json:"-"`
+	SourceTableSlug      null.String `json:"-"`
 }
 
 func SectionResponse(s *Section) *Section {
-	s.BaseUrl = generateBaseUrl(s)
-	s.Url = generateUrl(s)
-	// s.Url = generatePublicUrl(s)
+	s.SourceTableSlug = getSourceTableSlugAttribute(s)
+	s.Type = getTypeResponse(s)
+	s.Url = getUrlAttribute(s)
+	// s.Url = getUrlResponse(s)
+	s.BaseUrl = getBaseUrlAttribute(s)
+	// s.BaseUrl = getBaseUrlRespose(s)
 
 	return s
 }
 
-func generateBaseUrl(s *Section) null.String {
-	if s.TableName.String == "categories" {
-		return null.StringFrom("/" + s.CategorySlug.String)
+func getBaseUrlAttribute(s *Section) null.String {
+	url := null.StringFrom("")
+
+	if s.TableName.String != "" {
+		if s.TableName.String == "categories" {
+			url = null.StringFrom("/" + s.CategorySlug.String)
+		}
+
+		if s.TableName.String == "post_types" {
+			url = null.StringFrom("/" + s.PostTypeSlug.String)
+		}
+
+		if s.TableName.String == "tags" {
+			url = null.StringFrom("/tag/" + s.TagSlug.String)
+		}
+
+		if s.TableName.String == "users" {
+			url = null.StringFrom("/" + s.UserUsername.String)
+		}
 	}
 
-	if s.TableName.String == "post_types" {
-		return null.StringFrom("/" + s.PostTypeSlug.String)
-	}
-
-	if s.TableName.String == "tags" {
-		return null.StringFrom("/tag/" + s.TagSlug.String)
-	}
-
-	if s.TableName.String == "users" {
-		return null.StringFrom("/" + s.UserUsername.String)
-	}
-
-	return s.BaseUrl
+	return url
 }
 
-func generateUrl(s *Section) null.String {
+func getUrlAttribute(s *Section) null.String {
 	url := null.StringFrom("/v1/" + s.Type.String)
 
 	if s.Type.String == "latest-home" {
 		url = null.StringFrom("/v1/latest")
-		return url
 	}
 
 	if s.TableName.String != "" {
@@ -78,32 +88,59 @@ func generateUrl(s *Section) null.String {
 			url = null.StringFrom(url.String + "/homepage/")
 		}
 
-		if s.TableName.String == "categories" {
+		switch s.TableName.String {
+		case "categories":
 			url = null.StringFrom("/v1/" + os.Getenv("CATEGORY_SECTION_TYPE"))
 			url = null.StringFrom(url.String + "?category=" + s.CategorySlug.String)
-			return url
-		}
 
-		if s.TableName.String == "post_types" {
+		case "post_types":
 			url = null.StringFrom(url.String + "content-type/" + s.PostTypeSlug.String)
-			return url
-		}
 
-		if s.TableName.String == "tags" {
+		case "tags":
 			url = null.StringFrom(url.String + "tag/" + s.TagSlug.String)
-			return url
-		}
 
-		if s.TableName.String == "users" {
+		case "users":
 			url = null.StringFrom(url.String + "author/" + s.UserUsername.String)
-			return url
-		}
 
-		if s.TableName.String == "linkouts" {
+		case "linkouts":
 			url = s.LinkoutUrl
-			return url
+		default:
 		}
 	}
 
 	return url
+}
+
+func getTypeResponse(s *Section) null.String {
+	t := s.Type
+	if s.TableName.String == "post_types" {
+		t = null.StringFrom(t.String + "-" + s.SourceTableSlug.String)
+	}
+
+	return t
+}
+
+func getSourceTableSlugAttribute(s *Section) null.String {
+	ts := null.StringFrom("")
+	if s.TableName.String == "categories" {
+		return s.CategorySlug
+	}
+
+	if s.TableName.String == "post_types" {
+		return s.PostTypeSlug
+	}
+
+	if s.TableName.String == "tags" {
+		return s.TagSlug
+	}
+
+	if s.TableName.String == "users" {
+		return s.UserUsername
+	}
+
+	if s.TableName.String == "linkouts" {
+		return s.LinkoutUrl
+	}
+
+	return ts
 }
