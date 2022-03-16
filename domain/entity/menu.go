@@ -1,8 +1,6 @@
 package entity
 
 import (
-	"log"
-
 	"gopkg.in/guregu/null.v4"
 )
 
@@ -29,41 +27,64 @@ type Menu struct {
 	Rank     *Rank     `json:"-"`
 }
 
-func (m *Menu) ClassifyMenu() *Menu {
+func (m *Menu) SetMenuAttributes() *Menu {
+	m.setIsActive()
+	m.setUrl()
+	m.setType()
 
-	if m.TableName.String == "ranks" {
-		m.Type = null.StringFrom("rank")
-		log.Println(m.Slug)
-	}
+	return m
+}
 
+func (m *Menu) setIsActive() *Menu {
 	if m.GeneralStatusID == 1 {
 		m.IsActive = true
 	}
 
-	if m.Category != nil {
-		m.Type = null.StringFrom("category")
-		m.Url = null.StringFrom("/" + m.Slug.String)
+	return m
+}
 
+func (m *Menu) setUrl() *Menu {
+	if m.Category != nil {
+		m.Url = null.StringFrom("/" + m.Slug.String)
 		return m
 	}
 
 	if m.Linkout != nil {
-		m.Type = null.StringFrom("link")
 		m.Url = null.StringFrom(m.Linkout.Url)
-
 		return m
 	}
 
 	if m.Page != nil {
-		m.Type = null.StringFrom("page")
 		m.Url = m.Page.Url
-
 		return m
 	}
 
 	if m.Rank != nil {
 		m.Url = null.StringFrom("/" + m.Rank.Slug)
+		return m
+	}
 
+	return m
+}
+
+func (m *Menu) setType() *Menu {
+
+	if m.TableName.String == "ranks" {
+		m.Type = null.StringFrom("rank")
+	}
+
+	if m.Category != nil {
+		m.Type = null.StringFrom("category")
+		return m
+	}
+
+	if m.Linkout != nil {
+		m.Type = null.StringFrom("link")
+		return m
+	}
+
+	if m.Page != nil {
+		m.Type = null.StringFrom("page")
 		return m
 	}
 

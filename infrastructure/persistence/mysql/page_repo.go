@@ -37,7 +37,7 @@ func (pageRepo *PageRepo) GetPageBySlug(slug string) (*entity.Page, error) {
 	for rows.Next() {
 		err := rows.Scan(
 			&page.ID,
-			&page.Name,
+			&page.Page,
 			&page.Slug,
 			&page.Excerpt,
 			&page.Url,

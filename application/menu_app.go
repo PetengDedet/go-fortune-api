@@ -89,6 +89,7 @@ func getParentMenuIds(pm []entity.Menu) (parentMenuIds []int) {
 }
 
 func getMenuRelationIds(m []entity.Menu) (catIds, loIds, pageIds, rankIds []int64) {
+	//TODO: contine on each match
 	for _, m := range m {
 		if m.TableName.String == "categories" && m.TableID.Int64 != 0 {
 			catIds = append(catIds, m.TableID.Int64)
@@ -136,7 +137,7 @@ func mapMenuType(ma *MenuApp, menus []entity.Menu, catIds, loIds, pageIds, rankI
 			for _, cat := range categories {
 				if cat.ID.Int64 == m.TableID.Int64 {
 					m.Category = &cat
-					menus[index] = *m.ClassifyMenu()
+					menus[index] = *m.SetMenuAttributes()
 					break
 				}
 			}
@@ -147,7 +148,7 @@ func mapMenuType(ma *MenuApp, menus []entity.Menu, catIds, loIds, pageIds, rankI
 			for _, lo := range linkouts {
 				if lo.ID == m.TableID.Int64 {
 					m.Linkout = &lo
-					menus[index] = *m.ClassifyMenu()
+					menus[index] = *m.SetMenuAttributes()
 					break
 				}
 			}
@@ -158,7 +159,7 @@ func mapMenuType(ma *MenuApp, menus []entity.Menu, catIds, loIds, pageIds, rankI
 			for _, pg := range pages {
 				if pg.ID == m.TableID.Int64 {
 					m.Page = &pg
-					menus[index] = *m.ClassifyMenu()
+					menus[index] = *m.SetMenuAttributes()
 					break
 				}
 			}
@@ -169,14 +170,14 @@ func mapMenuType(ma *MenuApp, menus []entity.Menu, catIds, loIds, pageIds, rankI
 			for _, rk := range ranks {
 				if rk.ID == m.TableID.Int64 {
 					m.Rank = &rk
-					menus[index] = *m.ClassifyMenu()
+					menus[index] = *m.SetMenuAttributes()
 					break
 				}
 			}
 			continue
 		}
 
-		menus[index] = *m.ClassifyMenu()
+		menus[index] = *m.SetMenuAttributes()
 	}
 
 	return menus

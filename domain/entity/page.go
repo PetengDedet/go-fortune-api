@@ -10,7 +10,7 @@ type Page struct {
 	MetaTitle       null.String `json:"meta_title" db:"meta_title"`
 	MetaDescription null.String `json:"meta_description" db:"meta_description"`
 
-	Page          null.String `json:"page" db:="-"`
+	Page          null.String `json:"page" db:"-"`
 	ArticleCounts int64       `json:"article_counts" db:"-"`
 	Sections      []Section   `json:"sections" db:"-"`
 

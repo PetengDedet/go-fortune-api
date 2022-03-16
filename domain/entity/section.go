@@ -1,8 +1,6 @@
 package entity
 
 import (
-	"os"
-
 	"gopkg.in/guregu/null.v4"
 )
 
@@ -23,124 +21,98 @@ type Section struct {
 	PageSectionID        null.Int    `json:"-"`
 	PageSectionPageID    null.Int    `json:"-"`
 	PageSectionSectionID null.Int    `json:"-"`
-	CategoryName         null.String `json:"-"`
-	CategorySlug         null.String `json:"-"`
-	CategoryUrl          null.String `json:"-"`
-	TagName              null.String `json:"-"`
-	TagSlug              null.String `json:"-"`
-	TagUrl               null.String `json:"-"`
-	PostTypeName         null.String `json:"-"`
-	PostTypeSlug         null.String `json:"-"`
-	LinkoutUrl           null.String `json:"-"`
-	LinkoutType          null.String `json:"-"`
-	RankName             null.String `json:"-"`
-	RankSlug             null.String `json:"-"`
-	RankCategoryName     null.String `json:"-"`
-	RankCategorySlug     null.String `json:"-"`
-	UserUsername         null.String `json:"-"`
-	SourceTableSlug      null.String `json:"-"`
+
+	Category     *Category     `json:"-" db:"-"`
+	Linkout      *Linkout      `json:"-" db:"-"`
+	Rank         *Rank         `json:"-" db:"-"`
+	RankCategory *RankCategory `json:"-" db:"-"`
+	PostType     *PostType     `json:"-" db:"-"`
+	Tag          *Tag          `json:"-" db:"-"`
+
+	Media *Media `json:"-" db:"-"`
 }
 
-func SectionResponse(s *Section) *Section {
-	s.SourceTableSlug = getSourceTableSlugAttribute(s)
-	s.Type = getTypeResponse(s)
-	s.Url = getUrlAttribute(s)
-	// s.Url = getUrlResponse(s)
-	s.BaseUrl = getBaseUrlAttribute(s)
-	// s.BaseUrl = getBaseUrlRespose(s)
+func (s *Section) SetSectionAttributes() *Section {
+	s.setUrl()
+	s.setBaseUrl()
+
+	if s.Media != nil {
+		s.ImageUrl = s.Media.SetUrl(600, 600).Url
+	}
 
 	return s
 }
 
-func getBaseUrlAttribute(s *Section) null.String {
-	url := null.StringFrom("")
+func (s *Section) setBaseUrl() *Section {
 
-	if s.TableName.String != "" {
-		if s.TableName.String == "categories" {
-			url = null.StringFrom("/" + s.CategorySlug.String)
-		}
-
-		if s.TableName.String == "post_types" {
-			url = null.StringFrom("/" + s.PostTypeSlug.String)
-		}
-
-		if s.TableName.String == "tags" {
-			url = null.StringFrom("/tag/" + s.TagSlug.String)
-		}
-
-		if s.TableName.String == "users" {
-			url = null.StringFrom("/" + s.UserUsername.String)
-		}
+	if s.Type.String == "latest" && s.Tag != nil {
+		s.BaseUrl = null.StringFrom("/tag/" + s.Tag.Slug)
 	}
 
-	return url
+	if s.Type.String == "category" && s.Category != nil {
+		s.BaseUrl = null.StringFrom("/" + s.Category.Slug)
+	}
+
+	return s
 }
 
-func getUrlAttribute(s *Section) null.String {
-	url := null.StringFrom("/v1/" + s.Type.String)
+func (s *Section) setUrl() *Section {
+
+	if s.Type.String == "headline" {
+		s.Url = null.StringFrom("/v1/headline")
+	}
+
+	if s.Type.String == "headline" && s.TableName.String == "categories" && s.Category == nil {
+		s.Url = null.StringFrom("/v1/headline?category=")
+	}
 
 	if s.Type.String == "latest-home" {
-		url = null.StringFrom("/v1/latest")
+		s.Url = null.StringFrom("/v1/latest")
 	}
 
-	if s.TableName.String != "" {
-		if s.TableName.String != "categories" {
-			url = null.StringFrom(url.String + "/homepage/")
-		}
-
-		switch s.TableName.String {
-		case "categories":
-			url = null.StringFrom("/v1/" + os.Getenv("CATEGORY_SECTION_TYPE"))
-			url = null.StringFrom(url.String + "?category=" + s.CategorySlug.String)
-
-		case "post_types":
-			url = null.StringFrom(url.String + "content-type/" + s.PostTypeSlug.String)
-
-		case "tags":
-			url = null.StringFrom(url.String + "tag/" + s.TagSlug.String)
-
-		case "users":
-			url = null.StringFrom(url.String + "author/" + s.UserUsername.String)
-
-		case "linkouts":
-			url = s.LinkoutUrl
-		default:
-		}
+	if s.Type.String == "latest" && s.Tag != nil {
+		s.Url = null.StringFrom("/v1/latest/homepage/tag/" + s.Tag.Slug)
 	}
 
-	return url
-}
-
-func getTypeResponse(s *Section) null.String {
-	t := s.Type
-	if s.TableName.String == "post_types" {
-		t = null.StringFrom(t.String + "-" + s.SourceTableSlug.String)
+	if s.Type.String == "latest" && s.TableName.String == "tags" && s.Tag == nil {
+		s.Url = null.StringFrom("/v1/latest/tag/")
 	}
 
-	return t
-}
-
-func getSourceTableSlugAttribute(s *Section) null.String {
-	ts := null.StringFrom("")
-	if s.TableName.String == "categories" {
-		return s.CategorySlug
+	if s.Type.String == "latest" && s.TableName.String == "categories" && s.Category == nil {
+		s.Url = null.StringFrom("/v1/latest/category/")
 	}
 
-	if s.TableName.String == "post_types" {
-		return s.PostTypeSlug
+	if s.Type.String == "category" && s.Category != nil {
+		s.Url = null.StringFrom("/v1/headline?category=" + s.Category.Slug)
 	}
 
-	if s.TableName.String == "tags" {
-		return s.TagSlug
+	if s.Type.String == "magazines" {
+		s.Url = null.StringFrom("/v1/magazines")
 	}
 
-	if s.TableName.String == "users" {
-		return s.UserUsername
+	if s.Type.String == "most-popular" {
+		s.Url = null.StringFrom("/v1/most-popular")
 	}
 
-	if s.TableName.String == "linkouts" {
-		return s.LinkoutUrl
+	if s.Type.String == "popular-keyword" {
+		s.Url = null.StringFrom("/v1/popular-keyword")
 	}
 
-	return ts
+	if s.Type.String == "search" {
+		s.Url = null.StringFrom("/v1/search")
+	}
+
+	if s.Type.String == "rank-category" {
+		s.Url = null.StringFrom("/v1/rank-category")
+	}
+
+	if s.Linkout != nil {
+		s.Url = null.StringFrom(s.Linkout.Url)
+	}
+
+	if s.Type.String == "rank-awardee" {
+		s.Url = null.StringFrom("/v1/rank-awardee")
+	}
+
+	return s
 }
