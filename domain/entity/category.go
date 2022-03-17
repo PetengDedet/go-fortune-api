@@ -15,4 +15,6 @@ type Category struct {
 
 	GeneralStatus *GeneralStatus `json:"-" db:"-"`
 	Media         *Media         `json:"media" db:"-"`
+
+	PublishedPostCount int64 `json:"-" db:"-"`
 }

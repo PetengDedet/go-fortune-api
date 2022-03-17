@@ -59,6 +59,9 @@ func Init() {
 	postTypeRepo := mysql.PostTypeRepo{
 		DB: db,
 	}
+	publishedPostRepo := mysql.PublishedPostRepo{
+		DB: db,
+	}
 
 	// Apps
 	menuApp := application.MenuApp{
@@ -79,16 +82,17 @@ func Init() {
 		LinkoutRepo:      &linkoutRepo,
 	}
 
-	// categoryApp := application.CategoryApp{
-	// 	CategoryRepo: &categoryRepo,
-	// 	SectionRepo:  &sectionRepo,
-	// }
+	categoryApp := application.CategoryApp{
+		CategoryRepo:      &categoryRepo,
+		SectionRepo:       &sectionRepo,
+		PublishedPostRepo: &publishedPostRepo,
+	}
 
 	v1 := route.Group("/v1")
 	{
 		v1.GET("/menu", NewMenuHandler(menuApp).GetPublicMenuPositionsHandler)
 		v1.GET("/:pageSlug", NewPageHandler(pageApp).GetPageBySlugHandler)
-		// v1.GET("/category/:categorySlug", NewCategoryHandler(categoryApp).GetCategoryPageDetailHandler)
+		v1.GET("/category/:categorySlug", NewCategoryHandler(categoryApp, pageApp).GetCategoryPageDetailHandler)
 
 		latest := route.Group("/latest")
 		{
