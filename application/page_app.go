@@ -4,6 +4,7 @@ import (
 	"github.com/PetengDedet/fortune-post-api/common"
 	"github.com/PetengDedet/fortune-post-api/domain/entity"
 	"github.com/PetengDedet/fortune-post-api/domain/repository"
+	"gopkg.in/guregu/null.v4"
 )
 
 type PageAppInterface interface {
@@ -56,6 +57,38 @@ func (pageApp *PageApp) GetPageDetailBySlug(slug string) (*entity.Page, error) {
 	)
 
 	page.Sections = sections
+
+	return page, nil
+}
+
+func (pageApp *PageApp) GetCategoryPageDetail(slug string, category *entity.Category) (*entity.Page, error) {
+	page, err := pageApp.GetPageDetailBySlug(slug)
+	if err != nil {
+		return nil, err
+	}
+
+	page.Page = null.StringFrom(category.Name)
+	page.Slug = null.StringFrom(category.Slug)
+	page.Excerpt = category.Excerpt
+	page.MetaTitle = category.MetaTitle
+	page.MetaDescription = category.MetaDescription
+	page.Url = null.StringFrom("/" + category.Slug)
+	page.ArticleCounts = category.PublishedPostCount
+
+	// Set section url
+	for i, s := range page.Sections {
+		if s.Type.String == "headline" && s.Slug.String == "headline-categories" {
+			page.Sections[i] = *s.MutateUrl("/v1/headline?category=" + category.Slug)
+			page.Sections[i] = *s.MutateBaseUrl("/" + category.Slug)
+			continue
+		}
+
+		if s.Type.String == "latest" && s.Slug.String == "latest-categories" {
+			page.Sections[i] = *s.MutateUrl("/v1/latest/category/" + category.Slug)
+			page.Sections[i] = *s.MutateBaseUrl("/" + category.Slug)
+			continue
+		}
+	}
 
 	return page, nil
 }

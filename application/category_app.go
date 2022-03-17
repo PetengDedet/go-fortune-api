@@ -1,41 +1,38 @@
 package application
 
-// type CategoryAppInterface interface {
-// 	GetCategoryPageDetailBySlug(slug string) (*entity.CategoryPage, error)
-// }
+import (
+	"github.com/PetengDedet/fortune-post-api/common"
+	"github.com/PetengDedet/fortune-post-api/domain/entity"
+	"github.com/PetengDedet/fortune-post-api/domain/repository"
+)
 
-// type CategoryApp struct {
-// 	CategoryRepo repository.CategoryRepository
-// 	SectionRepo  repository.SectionRepository
-// }
+type CategoryAppInterface interface {
+	GetCategoryPageDetailBySlug(slug string) (*entity.Category, error)
+}
 
-// func (categoryApp *CategoryApp) GetCategoryPageDetailBySlug(slug string) (*entity.CategoryPage, error) {
-// 	category, err := categoryApp.CategoryRepo.GetCategoryPageBySlug(slug)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+type CategoryApp struct {
+	CategoryRepo      repository.CategoryRepository
+	SectionRepo       repository.SectionRepository
+	PublishedPostRepo repository.PublishedPostRepository
+}
 
-// 	// Category not found
-// 	if category.ID == 0 {
-// 		return nil, &common.NotFoundError{}
-// 	}
+func (categoryApp *CategoryApp) GetCategoryPageDetailBySlug(slug string) (*entity.Category, error) {
+	category, err := categoryApp.CategoryRepo.GetCategoryBySlug(slug)
+	if err != nil {
+		return nil, err
+	}
 
-// 	sections, err := categoryApp.SectionRepo.GetSectionsByPageSlug("category")
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	// Category not found
+	if category.ID.Int64 == 0 {
+		return nil, &common.NotFoundError{}
+	}
 
-// 	log.Println("Sectionsss", sections)
+	ppc, err := categoryApp.PublishedPostRepo.GetPublishedPostCountByCategoryId(category.ID.Int64)
+	if err != nil {
+		return nil, err
+	}
 
-// 	var ss []entity.Section
-// 	for _, s := range sections {
-// 		ss = append(ss, *entity.SectionResponse(&s))
-// 	}
-// 	category.Sections = ss
+	category.PublishedPostCount = ppc
 
-// 	if len(ss) <= 0 {
-// 		category.Sections = []entity.Section{}
-// 	}
-
-// 	return category, nil
-// }
+	return category, nil
+}

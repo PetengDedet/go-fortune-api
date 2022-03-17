@@ -116,3 +116,15 @@ func (s *Section) setUrl() *Section {
 
 	return s
 }
+
+func (s *Section) MutateUrl(url string) *Section {
+	s.Url = null.StringFrom(url)
+
+	return s
+}
+
+func (s *Section) MutateBaseUrl(baseUrl string) *Section {
+	s.BaseUrl = null.StringFrom(baseUrl)
+
+	return s
+}
