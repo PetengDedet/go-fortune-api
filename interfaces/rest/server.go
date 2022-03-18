@@ -81,9 +81,13 @@ func Init() {
 		CategoryRepo:     &categoryRepo,
 		LinkoutRepo:      &linkoutRepo,
 	}
-
 	categoryApp := application.CategoryApp{
 		CategoryRepo:      &categoryRepo,
+		SectionRepo:       &sectionRepo,
+		PublishedPostRepo: &publishedPostRepo,
+	}
+	tagApp := application.TagApp{
+		TagRepo:           &tagRepo,
 		SectionRepo:       &sectionRepo,
 		PublishedPostRepo: &publishedPostRepo,
 	}
@@ -93,6 +97,7 @@ func Init() {
 		v1.GET("/menu", NewMenuHandler(menuApp).GetPublicMenuPositionsHandler)
 		v1.GET("/:pageSlug", NewPageHandler(pageApp).GetPageBySlugHandler)
 		v1.GET("/category/:categorySlug", NewCategoryHandler(categoryApp, pageApp).GetCategoryPageDetailHandler)
+		v1.GET("/tag/:tagSlug", NewTagHandler(tagApp, pageApp).GetTagPageDetailHandler)
 
 		latest := route.Group("/latest")
 		{

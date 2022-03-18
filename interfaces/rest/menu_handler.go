@@ -20,7 +20,7 @@ func NewMenuHandler(menuApp application.MenuApp) *MenuHandler {
 func (menuHandler *MenuHandler) GetPublicMenuPositionsHandler(c *gin.Context) {
 	publicMenuPosition, err := menuHandler.MenuApp.GetPublicMenuPositions()
 	if err != nil {
-		panic(err)
+
 		c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
 		return
 	}

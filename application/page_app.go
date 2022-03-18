@@ -93,6 +93,34 @@ func (pageApp *PageApp) GetCategoryPageDetail(slug string, category *entity.Cate
 	return page, nil
 }
 
+func (pageApp *PageApp) GetTagPageDetail(slug string, tag *entity.Tag) (*entity.Page, error) {
+	page, err := pageApp.GetPageDetailBySlug(slug)
+	if err != nil {
+		return nil, err
+	}
+
+	// common.Println(tag)
+
+	page.Page = null.StringFrom(tag.Name)
+	page.Slug = null.StringFrom(tag.Slug)
+	page.Excerpt = tag.Excerpt
+	page.MetaTitle = tag.MetaTitle
+	page.MetaDescription = tag.MetaDescription
+	page.Url = null.StringFrom("/tag/" + tag.Slug)
+	page.ArticleCounts = tag.PublishedPostCount
+
+	// Set section url
+	for i, s := range page.Sections {
+		if s.Type.String == "latest" && s.Slug.String == "latest-tags" {
+			page.Sections[i] = *s.MutateUrl("/v1/latest/tag/" + tag.Slug)
+			page.Sections[i] = *s.MutateBaseUrl("/tag/" + tag.Slug)
+			continue
+		}
+	}
+
+	return page, nil
+}
+
 func getSectionRelationIds(s []entity.Section) (catIds, loIds, ptIds, tIds, rIds, rcIds []int64) {
 	for _, s := range s {
 		if s.TableName.String == "categories" && s.TableID.Int64 != 0 {
