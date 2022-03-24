@@ -40,16 +40,36 @@ type Media struct {
 }
 
 func (m *Media) SetUrl(width, height int) *Media {
+	m.Url = getUrl(m.UrlMedia, width, height)
+
+	return m
+}
+
+func getUrl(urlMedia null.String, width, height int) (url null.String) {
 	cdnDomain := os.Getenv("CDN_DOMAIN")
 	if cdnDomain == "" {
 		cdnDomain = "https://cdn.fortuneidn.com/"
 	}
 
-	fileBaseName := strings.TrimSuffix(filepath.Base(m.UrlMedia.String), filepath.Ext(m.UrlMedia.String))
-	extension := filepath.Ext(m.UrlMedia.String)
-	dirName := filepath.Dir(m.UrlMedia.String)
+	fileBaseName := strings.TrimSuffix(filepath.Base(urlMedia.String), filepath.Ext(urlMedia.String))
+	extension := filepath.Ext(urlMedia.String)
+	dirName := filepath.Dir(urlMedia.String)
 
-	m.Url = null.StringFrom(fmt.Sprintf("%s%s/%s_%dx%d%s", cdnDomain, dirName, fileBaseName, width, height, extension))
+	return null.StringFrom(fmt.Sprintf("%s%s/%s_%dx%d%s", cdnDomain, dirName, fileBaseName, width, height, extension))
+}
 
-	return m
+type Cover struct {
+	Thumbnail null.String `json:"thumbnail"`
+	Full      null.String `json:"full"`
+	Tiny      null.String `json:"tiny"`
+
+	UrlMedia null.String `json:"-"`
+}
+
+func (c *Cover) GetPredefinedSize() *Cover {
+	c.Thumbnail = getUrl(c.UrlMedia, 600, 400)
+	c.Full = getUrl(c.UrlMedia, 1050, 700)
+	c.Tiny = getUrl(c.UrlMedia, 6, 4)
+
+	return c
 }
