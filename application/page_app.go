@@ -1,6 +1,7 @@
 package application
 
 import (
+	"html"
 	"net/url"
 	"os"
 	"strconv"
@@ -134,8 +135,8 @@ func (pageApp *PageApp) GetSearchResultPageDetail(keyword string, currentPage in
 		domain = "https://post-api.fortuneidn.com/"
 	}
 
-	page.MetaTitle = null.StringFrom("Berita " + strconv.Quote(keyword) + " Terkini Hari Ini")
-	page.MetaDescription = null.StringFrom("Kumpulan berita " + strconv.Quote(keyword) + " terkini hari ini bisa kamu simak dengan lengkap disini dari berbagai macam sudut pandang.")
+	page.MetaTitle = null.StringFrom("Berita " + html.EscapeString(keyword) + " Terkini Hari Ini")
+	page.MetaDescription = null.StringFrom("Kumpulan berita " + html.EscapeString(keyword) + " terkini hari ini bisa kamu simak dengan lengkap disini dari berbagai macam sudut pandang.")
 
 	pageQueryParams := url.Values{
 		"keyword": {keyword},
@@ -150,7 +151,7 @@ func (pageApp *PageApp) GetSearchResultPageDetail(keyword string, currentPage in
 		"page":    {strconv.Itoa(currentPage + 1)},
 	}
 	page.Articles = &entity.SearchResultArticles{
-		NextUrl: null.StringFrom(domain + "/search?" + nextUrlQueryParams.Encode()),
+		NextUrl: null.StringFrom(domain + "search?" + nextUrlQueryParams.Encode()),
 		Data:    searchResult,
 	}
 

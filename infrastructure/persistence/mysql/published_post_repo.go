@@ -45,9 +45,85 @@ func (ppr *PublishedPostRepo) GetPublishedPostCountByTagId(tagId int64) (postCou
 	return postCount, nil
 }
 
-func (ppr *PublishedPostRepo) GetLatestPublishedPost(limit, skip int) ([]entity.PublishedPost, error) {
+func (ppr *PublishedPostRepo) GetLatestPublishedPost(limit, skip int) ([]entity.SearchResultArticle, error) {
+	query := `
+		SELECT
+			pp.id, 
+			pp.title,
+			pp.slug,
+			pp.publish_at,
+			pp.is_csc,
+			pp.post_type_id,
+			pp.category_id,
+			pp.cover_media_id,
+			pp.created_by,
+			m.url_media,
+			c.name,
+			c.slug,
+			pt.name,
+			pt.slug,
+			u.username
+		FROM published_posts pp
+			INNER JOIN post_types pt ON pp.post_type_id = pt.id
+			INNER JOIN categories c ON pp.category_id = c.id
+			INNER JOIN medias m ON pp.cover_media_id = m.id
+			INNER JOIN users u ON pp.created_by = u.id
+		ORDER BY pp.publish_at DESC
+		LIMIT ? OFFSET ?
+	`
 
-	return nil, nil
+	rows, err := ppr.DB.Query(query, limit, skip)
+	if err != nil {
+		return nil, err
+	}
+
+	var sr []entity.SearchResultArticle
+	for rows.Next() {
+		var art entity.SearchResultArticle
+		var cover entity.Cover
+		var srCat entity.SearchResultCategory
+		var srPt entity.SearchResultPostType
+		var publishAt string
+		var username *string
+		err := rows.Scan(
+			&art.ID,
+			&art.Title,
+			&art.Slug,
+			&publishAt,
+			&art.IsCSC,
+			&art.PostTypeID,
+			&art.CategoryID,
+			&art.CoverMediaID,
+			&art.CreatorID,
+			&cover.UrlMedia,
+			&srCat.Name,
+			&srCat.Slug,
+			&srPt.Name,
+			&srPt.Slug,
+			&username,
+		)
+
+		if err != nil {
+			panic(err)
+		}
+
+		srCat.Url = "/" + srCat.Slug
+		art.Category = &srCat
+		art.Cover = cover.GetPredefinedSize()
+		art.PostType = &srPt
+
+		t, err := time.Parse(time.RFC3339, publishAt)
+		if err != nil {
+			panic(err)
+		}
+		art.ReleaseDate = t.Unix()
+
+		art.ArticleUrl = "/" + srCat.Slug + "/" + *username + "/" + art.Slug
+
+		sr = append(sr, art)
+	}
+
+	return sr, nil
 }
 
 func (ppr *PublishedPostRepo) SearchPublishedPostByKeyword(keyword string, limit, skip int) ([]entity.SearchResultArticle, error) {

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/PetengDedet/fortune-post-api/application"
 	"github.com/PetengDedet/fortune-post-api/common"
@@ -28,6 +29,7 @@ func (handler *SearchHandler) GetSearchResultHandler(c *gin.Context) {
 		keyword = ""
 		// TODO: get latest article
 	}
+	keyword = strings.TrimSpace(keyword)
 
 	pageParam, ok := c.GetQuery("page")
 	if !ok {
