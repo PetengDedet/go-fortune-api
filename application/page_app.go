@@ -1,6 +1,11 @@
 package application
 
 import (
+	"html"
+	"net/url"
+	"os"
+	"strconv"
+
 	"github.com/PetengDedet/fortune-post-api/common"
 	"github.com/PetengDedet/fortune-post-api/domain/entity"
 	"github.com/PetengDedet/fortune-post-api/domain/repository"
@@ -99,8 +104,6 @@ func (pageApp *PageApp) GetTagPageDetail(slug string, tag *entity.Tag) (*entity.
 		return nil, err
 	}
 
-	// common.Println(tag)
-
 	page.Page = null.StringFrom(tag.Name)
 	page.Slug = null.StringFrom(tag.Slug)
 	page.Excerpt = tag.Excerpt
@@ -116,6 +119,40 @@ func (pageApp *PageApp) GetTagPageDetail(slug string, tag *entity.Tag) (*entity.
 			page.Sections[i] = *s.MutateBaseUrl("/tag/" + tag.Slug)
 			continue
 		}
+	}
+
+	return page, nil
+}
+
+func (pageApp *PageApp) GetSearchResultPageDetail(keyword string, currentPage int, searchResult []entity.SearchResultArticle) (*entity.Page, error) {
+	page, err := pageApp.GetPageDetailBySlug("search")
+	if err != nil {
+		return nil, err
+	}
+
+	domain := os.Getenv("APP_URL")
+	if len(domain) == 0 {
+		domain = "https://post-api.fortuneidn.com/"
+	}
+
+	page.MetaTitle = null.StringFrom("Berita " + html.EscapeString(keyword) + " Terkini Hari Ini")
+	page.MetaDescription = null.StringFrom("Kumpulan berita " + html.EscapeString(keyword) + " terkini hari ini bisa kamu simak dengan lengkap disini dari berbagai macam sudut pandang.")
+
+	pageQueryParams := url.Values{
+		"keyword": {keyword},
+		"page":    {strconv.Itoa(currentPage)},
+	}
+
+	page.ArticleCounts = int64(len(searchResult))
+	page.Url = null.StringFrom(page.Url.String + "?" + pageQueryParams.Encode())
+
+	nextUrlQueryParams := url.Values{
+		"keyword": {keyword},
+		"page":    {strconv.Itoa(currentPage + 1)},
+	}
+	page.Articles = &entity.SearchResultArticles{
+		NextUrl: null.StringFrom(domain + "search?" + nextUrlQueryParams.Encode()),
+		Data:    searchResult,
 	}
 
 	return page, nil

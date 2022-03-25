@@ -26,4 +26,6 @@ type Page struct {
 	GeneralStatus *GeneralStatus `json:"-" db:"-"`
 	Creator       *User          `json:"-" db:"-"`
 	Updater       *User          `json:"-" db:"-"`
+
+	Articles *SearchResultArticles `json:"articles,omitempty" db:"-"`
 }

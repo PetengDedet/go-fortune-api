@@ -1,6 +1,10 @@
 package entity
 
-import "gopkg.in/guregu/null.v4"
+import (
+	"os"
+
+	"gopkg.in/guregu/null.v4"
+)
 
 type User struct {
 	ID          int64       `json:"id" db:"id"`
@@ -25,4 +29,29 @@ type User struct {
 
 	UserType      *UserType      `json:"-" db:"-"`
 	GeneralStatus *GeneralStatus `json:"-" db:"-"`
+}
+
+type Author struct {
+	Username  string      `json:"username"`
+	Nickname  null.String `json:"nickname"`
+	Name      string      `json:"name"`
+	Avatar    null.String `json:"avatar"`
+	AuthorUrl string      `json:"author_url"`
+
+	PostID int64 `json:"-"`
+}
+
+func (a *Author) SetAvatar() *Author {
+	cdnDomain := os.Getenv("CDN_DOMAIN")
+	if len(cdnDomain) == 0 {
+		cdnDomain = "https://cdn.fortuneidn.com/"
+	}
+
+	if a.Avatar.String == "" {
+		a.Avatar = null.StringFrom("avatar/no-avatar.png")
+	}
+
+	a.Avatar = null.StringFrom(cdnDomain + a.Avatar.String)
+
+	return a
 }

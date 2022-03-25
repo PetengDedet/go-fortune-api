@@ -91,6 +91,10 @@ func Init() {
 		SectionRepo:       &sectionRepo,
 		PublishedPostRepo: &publishedPostRepo,
 	}
+	searchApp := application.SearchApp{
+		PageRepo:          &pageRepo,
+		PublishedPostRepo: &publishedPostRepo,
+	}
 
 	v1 := route.Group("/v1")
 	{
@@ -98,6 +102,7 @@ func Init() {
 		v1.GET("/:pageSlug", NewPageHandler(pageApp).GetPageBySlugHandler)
 		v1.GET("/category/:categorySlug", NewCategoryHandler(categoryApp, pageApp).GetCategoryPageDetailHandler)
 		v1.GET("/tag/:tagSlug", NewTagHandler(tagApp, pageApp).GetTagPageDetailHandler)
+		v1.GET("/search", NewSearchHandler(searchApp, pageApp).GetSearchResultHandler)
 
 		latest := route.Group("/latest")
 		{
@@ -116,12 +121,6 @@ func Init() {
 					"route": "/v1/latest/homepage/content-type/" + c.Param("slug"),
 				})
 			})
-			// test.GET("/tag/:slug", func (c *gin.Context)  {
-			// 	c.JSON(http.StatusOK, gin.H{
-			// 		"route": "/v1/latest/homepage/content-type/" + c.Param("slug"),
-			// 	})
-			// })
-
 		}
 	}
 
