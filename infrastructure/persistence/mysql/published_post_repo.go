@@ -61,7 +61,7 @@ func (ppr *PublishedPostRepo) GetPublishedPostCountByPostTypeId(postTypeId int64
 	return postCount, nil
 }
 
-func (ppr *PublishedPostRepo) GetLatestPublishedPost(limit, skip int) ([]entity.SearchResultArticle, error) {
+func (ppr *PublishedPostRepo) GetLatestPublishedPost(limit, skip int) ([]entity.PostList, error) {
 	query := `
 		SELECT
 			pp.id, 
@@ -93,9 +93,9 @@ func (ppr *PublishedPostRepo) GetLatestPublishedPost(limit, skip int) ([]entity.
 		return nil, err
 	}
 
-	var sr []entity.SearchResultArticle
+	var sr []entity.PostList
 	for rows.Next() {
-		var art entity.SearchResultArticle
+		var art entity.PostList
 		var cover entity.Cover
 		var srCat entity.SearchResultCategory
 		var srPt entity.SearchResultPostType
@@ -142,7 +142,90 @@ func (ppr *PublishedPostRepo) GetLatestPublishedPost(limit, skip int) ([]entity.
 	return sr, nil
 }
 
-func (ppr *PublishedPostRepo) SearchPublishedPostByKeyword(keyword string, limit, skip int) ([]entity.SearchResultArticle, error) {
+func (ppr *PublishedPostRepo) GetPopularPosts() ([]entity.PostList, error) {
+	query := `
+		SELECT
+			pp.id, 
+			pp.title,
+			pp.slug,
+			pp.publish_at,
+			pp.is_csc,
+			pp.post_type_id,
+			pp.category_id,
+			pp.cover_media_id,
+			pp.created_by,
+			pp.excerpt,
+			m.url_media,
+			c.name,
+			c.slug,
+			pt.name,
+			pt.slug,
+			u.username
+		FROM post_populars ppo
+			INNER JOIN published_posts pp ON pp.id = ppo.post_id
+			INNER JOIN post_types pt ON pp.post_type_id = pt.id
+			INNER JOIN categories c ON pp.category_id = c.id
+			INNER JOIN medias m ON pp.cover_media_id = m.id
+			INNER JOIN users u ON pp.created_by = u.id
+		ORDER BY ppo.order_num
+	`
+
+	rows, err := ppr.DB.Query(query)
+	if err != nil {
+		return nil, err
+	}
+
+	var sr []entity.PostList
+	for rows.Next() {
+		var art entity.PostList
+		var cover entity.Cover
+		var srCat entity.SearchResultCategory
+		var srPt entity.SearchResultPostType
+		var publishAt string
+		var username *string
+		err := rows.Scan(
+			&art.ID,
+			&art.Title,
+			&art.Slug,
+			&publishAt,
+			&art.IsCSC,
+			&art.PostTypeID,
+			&art.CategoryID,
+			&art.CoverMediaID,
+			&art.CreatorID,
+			&art.Excerpt,
+			&cover.UrlMedia,
+			&srCat.Name,
+			&srCat.Slug,
+			&srPt.Name,
+			&srPt.Slug,
+			&username,
+		)
+
+		if err != nil {
+			panic(err)
+		}
+
+		srCat.Url = "/" + srCat.Slug
+		art.Category = &srCat
+		art.Cover = cover.GetPredefinedSize()
+		art.PostType = &srPt
+
+		t, err := time.Parse(time.RFC3339, publishAt)
+		if err != nil {
+			panic(err)
+		}
+		art.ReleaseDate = t.Unix()
+
+		art.ArticleUrl = "/" + srCat.Slug + "/" + *username + "/" + art.Slug
+
+		sr = append(sr, art)
+	}
+
+	return sr, nil
+}
+
+func (ppr *PublishedPostRepo) SearchPublishedPostByKeyword(keyword string, limit, skip int) ([]entity.PostList, error) {
 	relevant, lessRelevant := formatKeyword(keyword)
 	stmt, err := ppr.DB.Preparex(`
 		SELECT
@@ -182,9 +265,9 @@ func (ppr *PublishedPostRepo) SearchPublishedPostByKeyword(keyword string, limit
 		return nil, err
 	}
 
-	var sr []entity.SearchResultArticle
+	var sr []entity.PostList
 	for rows.Next() {
-		var art entity.SearchResultArticle
+		var art entity.PostList
 		var cover entity.Cover
 		var srCat entity.SearchResultCategory
 		var srPt entity.SearchResultPostType
@@ -256,50 +339,4 @@ func formatKeyword(keyword string) (relevant, lessRelevant string) {
 	lessRelevant = "'+(" + lessRelevant + ")'"
 
 	return relevant, lessRelevant
-}
-
-func (ppr *PublishedPostRepo) GetAuthorsByPostIds(postIds []int) ([]entity.Author, error) {
-	query, args, err := sqlx.In(`
-		SELECT
-			u.name,
-			u.username,
-			u.nickname,
-			u.avatar,
-			post_id
-		FROM post_authors pa
-		INNER JOIN users u ON pa.author_id = u.id
-		WHERE post_id IN (?)
-		ORDER BY order_num
-	`, postIds)
-
-	if err != nil {
-		panic(err)
-	}
-
-	query = ppr.DB.Rebind(query)
-	rows, err := ppr.DB.Query(query, args...)
-	if err != nil {
-		return nil, err
-	}
-
-	var authors []entity.Author
-	for rows.Next() {
-		var author entity.Author
-		err := rows.Scan(
-			&author.Name,
-			&author.Username,
-			&author.Nickname,
-			&author.Avatar,
-			&author.PostID,
-		)
-		if err != nil {
-			panic(err)
-		}
-
-		author.AuthorUrl = "/" + author.Username
-
-		authors = append(authors, author)
-	}
-
-	return authors, nil
 }
