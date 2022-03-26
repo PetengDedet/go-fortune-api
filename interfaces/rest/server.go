@@ -62,6 +62,9 @@ func Init() {
 	publishedPostRepo := mysql.PublishedPostRepo{
 		DB: db,
 	}
+	userRepo := mysql.UserRepo{
+		DB: db,
+	}
 
 	// Apps
 	menuApp := application.MenuApp{
@@ -93,10 +96,15 @@ func Init() {
 	}
 	searchApp := application.SearchApp{
 		PublishedPostRepo: &publishedPostRepo,
+		UserRepo:          &userRepo,
 	}
 	postTypeApp := application.PostTypeApp{
 		PostTypeRepo:      &postTypeRepo,
 		PublishedPostRepo: &publishedPostRepo,
+	}
+	publishedPostApp := application.PublishedPostApp{
+		PublishePostRepo: &publishedPostRepo,
+		UserRepo:         &userRepo,
 	}
 
 	v1 := route.Group("/v1")
@@ -107,6 +115,7 @@ func Init() {
 		v1.GET("/tag/:tagSlug", NewTagHandler(tagApp, pageApp).GetTagPageDetailHandler)
 		v1.GET("/search", NewSearchHandler(searchApp, pageApp).GetSearchResultHandler)
 		v1.GET("/content-type/:postTypeSlug", NewPostTypeHandler(postTypeApp, pageApp).GetPostTypePageHandler)
+		v1.GET("/most-popular", NewPublishedPostHandler(publishedPostApp).GetMostPopularPostHandler)
 
 		latest := route.Group("/latest")
 		{

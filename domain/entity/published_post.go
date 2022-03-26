@@ -9,11 +9,11 @@ type PublishedPost struct {
 }
 
 type SearchResultArticles struct {
-	NextUrl null.String           `json:"next_url"`
-	Data    []SearchResultArticle `json:"data"`
+	NextUrl null.String `json:"next_url"`
+	Data    []PostList  `json:"data"`
 }
 
-type SearchResultArticle struct {
+type PostList struct {
 	ID          int64       `json:"-"`
 	Title       string      `json:"title"`
 	Slug        string      `json:"slug"`

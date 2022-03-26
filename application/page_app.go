@@ -124,7 +124,7 @@ func (pageApp *PageApp) GetTagPageDetail(slug string, tag *entity.Tag) (*entity.
 	return page, nil
 }
 
-func (pageApp *PageApp) GetSearchResultPageDetail(keyword string, currentPage int, searchResult []entity.SearchResultArticle) (*entity.Page, error) {
+func (pageApp *PageApp) GetSearchResultPageDetail(keyword string, currentPage int, searchResult []entity.PostList) (*entity.Page, error) {
 	page, err := pageApp.GetPageDetailBySlug("search")
 	if err != nil {
 		return nil, err
