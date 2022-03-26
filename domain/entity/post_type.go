@@ -12,7 +12,8 @@ type PostType struct {
 
 	MediaID null.Int `json:"-" db:"media_id"`
 
-	Media *Media `json:"-" db:"-"`
+	Media              *Media `json:"-" db:"-"`
+	PublishedPostCount int64  `json:"-" db:"-"`
 }
 
 type SearchResultPostType struct {

@@ -92,7 +92,10 @@ func Init() {
 		PublishedPostRepo: &publishedPostRepo,
 	}
 	searchApp := application.SearchApp{
-		PageRepo:          &pageRepo,
+		PublishedPostRepo: &publishedPostRepo,
+	}
+	postTypeApp := application.PostTypeApp{
+		PostTypeRepo:      &postTypeRepo,
 		PublishedPostRepo: &publishedPostRepo,
 	}
 
@@ -103,6 +106,7 @@ func Init() {
 		v1.GET("/category/:categorySlug", NewCategoryHandler(categoryApp, pageApp).GetCategoryPageDetailHandler)
 		v1.GET("/tag/:tagSlug", NewTagHandler(tagApp, pageApp).GetTagPageDetailHandler)
 		v1.GET("/search", NewSearchHandler(searchApp, pageApp).GetSearchResultHandler)
+		v1.GET("/content-type/:postTypeSlug", NewPostTypeHandler(postTypeApp, pageApp).GetPostTypePageHandler)
 
 		latest := route.Group("/latest")
 		{

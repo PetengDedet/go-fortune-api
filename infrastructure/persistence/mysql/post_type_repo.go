@@ -56,3 +56,41 @@ func (postTypeRepo *PostTypeRepo) GetPostTypeByIds(ids []int64) ([]entity.PostTy
 
 	return postTypes, nil
 }
+
+func (postTypeRepo *PostTypeRepo) GetPostTypeBySlug(slug string) (*entity.PostType, error) {
+	query := `
+		SELECT
+			id,
+			name,
+			slug,
+			excerpt,
+			meta_title,
+			meta_description
+		FROM post_types
+		WHERE slug = ?
+		LIMIT 1
+	`
+
+	rows, err := postTypeRepo.DB.Query(query, slug)
+	if err != nil {
+		panic(err)
+	}
+
+	var postType = &entity.PostType{}
+	for rows.Next() {
+		err := rows.Scan(
+			&postType.ID,
+			&postType.Name,
+			&postType.Slug,
+			&postType.Excerpt,
+			&postType.MetaTitle,
+			&postType.MetaDescription,
+		)
+
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	return postType, nil
+}

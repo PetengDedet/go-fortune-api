@@ -9,7 +9,6 @@ import (
 )
 
 type SearchApp struct {
-	PageRepo          repository.PageRepository
 	PublishedPostRepo repository.PublishedPostRepository
 }
 
