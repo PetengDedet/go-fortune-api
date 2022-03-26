@@ -158,6 +158,23 @@ func (pageApp *PageApp) GetSearchResultPageDetail(keyword string, currentPage in
 	return page, nil
 }
 
+func (app *PageApp) GetPostTypePageDetail(postType *entity.PostType) (*entity.Page, error) {
+	page, err := app.GetPageDetailBySlug("search")
+	if err != nil {
+		return nil, err
+	}
+
+	page.Excerpt = postType.Excerpt
+	page.ArticleCounts = postType.PublishedPostCount
+	page.Page = null.StringFrom(postType.Name)
+	page.Slug = null.StringFrom(postType.Slug)
+	page.Url = null.StringFrom("/" + postType.Slug)
+	page.MetaTitle = postType.MetaTitle
+	page.MetaDescription = postType.MetaDescription
+
+	return page, nil
+}
+
 func getSectionRelationIds(s []entity.Section) (catIds, loIds, ptIds, tIds, rIds, rcIds []int64) {
 	for _, s := range s {
 		if s.TableName.String == "categories" && s.TableID.Int64 != 0 {

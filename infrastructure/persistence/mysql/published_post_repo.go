@@ -45,6 +45,22 @@ func (ppr *PublishedPostRepo) GetPublishedPostCountByTagId(tagId int64) (postCou
 	return postCount, nil
 }
 
+func (ppr *PublishedPostRepo) GetPublishedPostCountByPostTypeId(postTypeId int64) (postCount int64, error error) {
+	query := `
+		SELECT
+			COUNT(*) post_count
+		FROM published_posts pp
+		WHERE pp.post_type_id = ?
+	`
+
+	err := ppr.DB.Get(&postCount, query, postTypeId)
+	if err != nil {
+		return 0, err
+	}
+
+	return postCount, nil
+}
+
 func (ppr *PublishedPostRepo) GetLatestPublishedPost(limit, skip int) ([]entity.SearchResultArticle, error) {
 	query := `
 		SELECT
