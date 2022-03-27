@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/PetengDedet/fortune-post-api/internal/application"
+	"github.com/PetengDedet/fortune-post-api/internal/infrastructure/persistence/mongodb"
 	"github.com/PetengDedet/fortune-post-api/internal/infrastructure/persistence/mysql"
 	"github.com/gin-gonic/gin"
 )
@@ -31,7 +32,14 @@ func Init() {
 	}
 	defer db.Close()
 
+	mongoClient := mongodb.GetMongoClient(os.Getenv("MONGODB_URI"))
+	mongoDB := mongodb.GetDB(mongoClient, os.Getenv("MONGODB_DATABASE"))
+	defer mongodb.CloseMongoConnection()
 	// Repos
+	keywordRepo := mongodb.KeywordRepo{
+		DB: mongoDB,
+	}
+
 	menuRepo := mysql.MenuRepo{
 		DB: db,
 	}
@@ -106,6 +114,9 @@ func Init() {
 		PublishePostRepo: &publishedPostRepo,
 		UserRepo:         &userRepo,
 	}
+	keywordApp := application.KeywordApp{
+		KeywordRepo: &keywordRepo,
+	}
 
 	v1 := route.Group("/v1")
 	{
@@ -114,6 +125,7 @@ func Init() {
 		v1.GET("/category/:categorySlug", NewCategoryHandler(categoryApp, pageApp).GetCategoryPageDetailHandler)
 		v1.GET("/tag/:tagSlug", NewTagHandler(tagApp, pageApp).GetTagPageDetailHandler)
 		v1.GET("/search", NewSearchHandler(searchApp, pageApp).GetSearchResultHandler)
+		v1.POST("/search", NewKeywordHandler(&keywordApp).SaveKeywordHandler)
 		v1.GET("/content-type/:postTypeSlug", NewPostTypeHandler(postTypeApp, pageApp).GetPostTypePageHandler)
 		v1.GET("/most-popular", NewPublishedPostHandler(publishedPostApp).GetMostPopularPostHandler)
 
