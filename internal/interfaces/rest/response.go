@@ -1,6 +1,8 @@
 package rest
 
-import "net/http"
+import (
+	"net/http"
+)
 
 type ErrorPayload struct {
 	Message          string `json:"message"`
@@ -53,5 +55,15 @@ func SuccessResponse(data interface{}) *Response {
 		Status:  http.StatusOK,
 		Message: "success",
 		Data:    data,
+	}
+}
+
+func BadRequestResponse(message, reason string) *ErrorResponse {
+	return &ErrorResponse{
+		Status: http.StatusBadRequest,
+		Error: &ErrorPayload{
+			Message: message,
+			Reason:  reason,
+		},
 	}
 }

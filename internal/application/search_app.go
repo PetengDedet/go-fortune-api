@@ -53,6 +53,10 @@ func (app *SearchApp) GetSearchResult(keyword string, page int) ([]entity.PostLi
 	}
 
 	authors, err := app.UserRepo.GetAuthorsByPostIds(postIds)
+	if err != nil {
+		panic(err)
+	}
+
 	posts = mapAuthorToPost(posts, authors)
 
 	return posts, nil
