@@ -11,15 +11,6 @@ import (
 )
 
 func Init() {
-	route := gin.Default()
-
-	route.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"status": "OK",
-			"app":    "Fortune API",
-		})
-	})
-
 	db_host := os.Getenv("MYSQL_HOST")
 	db_port := os.Getenv("MYSQL_PORT")
 	db_name := os.Getenv("MYSQL_DBNAME")
@@ -36,8 +27,12 @@ func Init() {
 	mongoDB := mongodb.GetDB(mongoClient, os.Getenv("MONGODB_DATABASE"))
 	defer mongodb.CloseMongoConnection()
 	// Repos
-	keywordRepo := mongodb.KeywordRepo{
+	keywordMongoRepo := mongodb.KeywordRepo{
 		DB: mongoDB,
+	}
+
+	keywordRepo := mysql.KeywordRepo{
+		DB: db,
 	}
 
 	menuRepo := mysql.MenuRepo{
@@ -114,18 +109,30 @@ func Init() {
 		PublishePostRepo: &publishedPostRepo,
 		UserRepo:         &userRepo,
 	}
+	keywordMongoApp := application.KeywordApp{
+		KeywordRepo: &keywordMongoRepo,
+	}
 	keywordApp := application.KeywordApp{
 		KeywordRepo: &keywordRepo,
 	}
 
+	route := gin.Default()
+
+	route.GET("/", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"status": "OK",
+			"app":    "Fortune API",
+		})
+	})
+
 	v1 := route.Group("/v1")
 	{
 		v1.GET("/menu", NewMenuHandler(menuApp).GetPublicMenuPositionsHandler)
-		v1.GET("/:pageSlug", NewPageHandler(pageApp).GetPageBySlugHandler)
 		v1.GET("/category/:categorySlug", NewCategoryHandler(categoryApp, pageApp).GetCategoryPageDetailHandler)
 		v1.GET("/tag/:tagSlug", NewTagHandler(tagApp, pageApp).GetTagPageDetailHandler)
 		v1.GET("/search", NewSearchHandler(searchApp, pageApp).GetSearchResultHandler)
-		v1.POST("/search", NewKeywordHandler(&keywordApp).SaveKeywordHandler)
+		v1.POST("/search", NewKeywordHandler(&keywordMongoApp).SaveKeywordHandler)
+		v1.GET("/popular-keyword", NewKeywordHandler(&keywordApp).GetPopularKeywordHandler)
 		v1.GET("/content-type/:postTypeSlug", NewPostTypeHandler(postTypeApp, pageApp).GetPostTypePageHandler)
 		v1.GET("/most-popular", NewPublishedPostHandler(publishedPostApp).GetMostPopularPostHandler)
 
@@ -147,6 +154,8 @@ func Init() {
 				})
 			})
 		}
+
+		v1.GET("/:pageSlug", NewPageHandler(pageApp).GetPageBySlugHandler)
 	}
 
 	route.Run(":8000")

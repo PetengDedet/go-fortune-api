@@ -1,9 +1,11 @@
 package rest
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/PetengDedet/fortune-post-api/internal/application"
+	"github.com/PetengDedet/fortune-post-api/internal/common"
 	"github.com/PetengDedet/fortune-post-api/internal/domain/entity"
 	"github.com/gin-gonic/gin"
 )
@@ -33,4 +35,19 @@ func (handler *KeywordHandler) SaveKeywordHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, SuccessResponse(gin.H{}))
+}
+
+func (handler *KeywordHandler) GetPopularKeywordHandler(c *gin.Context) {
+	kw, err := handler.KeywordApp.GetPopularKeyword()
+	if err != nil {
+		if errors.Is(&common.NotFoundError{}, err) {
+			c.JSON(http.StatusNotFound, NotFoundResponse(nil))
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
+		return
+	}
+
+	c.JSON(http.StatusOK, SuccessResponse(kw))
 }
