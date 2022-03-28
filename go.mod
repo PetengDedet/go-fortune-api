@@ -18,6 +18,7 @@ require (
 	github.com/simukti/sqldb-logger/logadapter/zerologadapter v0.0.0-20201125162808-c35f87e285f2 // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/ugorji/go v1.2.7 // indirect
+	go.mongodb.org/mongo-driver v1.8.4 // indirect
 	golang.org/x/crypto v0.0.0-20220321153916-2c7772ba3064 // indirect
 	golang.org/x/sys v0.0.0-20220319134239-a9b59b0215f8 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect

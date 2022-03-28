@@ -12,8 +12,8 @@ type KeywordRepo struct {
 	DB *mongo.Database
 }
 
-func (c *KeywordRepo) SaveNewKeyword(keyword string) error {
-	coll := c.DB.Collection("keyword_histories")
+func (repo *KeywordRepo) SaveNewKeyword(keyword string) error {
+	coll := repo.DB.Collection("keyword_histories")
 	now := time.Now()
 	doc := &entity.KeywordHistory{
 		Keyword:   keyword,
@@ -27,4 +27,8 @@ func (c *KeywordRepo) SaveNewKeyword(keyword string) error {
 	}
 
 	return nil
+}
+
+func (repo *KeywordRepo) GetPopularKeyword() ([]entity.Keyword, error) {
+	return nil, nil
 }
