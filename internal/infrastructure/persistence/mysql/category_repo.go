@@ -11,7 +11,7 @@ type CategoryRepo struct {
 	DB *sqlx.DB
 }
 
-func (categoryRepo *CategoryRepo) GetCategoryBySlug(slug string) (*entity.Category, error) {
+func (repo *CategoryRepo) GetCategoryBySlug(slug string) (*entity.Category, error) {
 	query := `
 		SELECT
 			c.id,
@@ -26,7 +26,7 @@ func (categoryRepo *CategoryRepo) GetCategoryBySlug(slug string) (*entity.Catego
 		LIMIT 1
 	`
 
-	rows, err := categoryRepo.DB.Query(query, slug, 1)
+	rows, err := repo.DB.Query(query, slug, 1)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func (categoryRepo *CategoryRepo) GetCategoryBySlug(slug string) (*entity.Catego
 	return category, nil
 }
 
-func (categoryRepo *CategoryRepo) GetCategoriesByIds(categoryIds []int64) ([]entity.Category, error) {
+func (repo *CategoryRepo) GetCategoriesByIds(categoryIds []int64) ([]entity.Category, error) {
 	if len(categoryIds) == 0 {
 		return nil, nil
 	}
@@ -71,8 +71,8 @@ func (categoryRepo *CategoryRepo) GetCategoriesByIds(categoryIds []int64) ([]ent
 		return nil, err
 	}
 
-	query = categoryRepo.DB.Rebind(query)
-	rows, err := categoryRepo.DB.Query(query, args...)
+	query = repo.DB.Rebind(query)
+	rows, err := repo.DB.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}

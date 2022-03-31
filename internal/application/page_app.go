@@ -28,8 +28,8 @@ type PageApp struct {
 
 // var _ PageAppInterface = &PageApp{}
 
-func (pageApp *PageApp) GetPageDetailBySlug(slug string) (*entity.Page, error) {
-	page, err := pageApp.PageRepo.GetPageBySlug(slug)
+func (app *PageApp) GetPageDetailBySlug(slug string) (*entity.Page, error) {
+	page, err := app.PageRepo.GetPageBySlug(slug)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func (pageApp *PageApp) GetPageDetailBySlug(slug string) (*entity.Page, error) {
 		return nil, &common.NotFoundError{}
 	}
 
-	sections, err := pageApp.SectionRepo.GetSectionsByPageId(page.ID)
+	sections, err := app.SectionRepo.GetSectionsByPageId(page.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (pageApp *PageApp) GetPageDetailBySlug(slug string) (*entity.Page, error) {
 
 	catIds, loIds, ptIds, tIds, rIds, rcIds := getSectionRelationIds(sections)
 	sections = mapSectionType(
-		pageApp,
+		app,
 		sections,
 		catIds,
 		loIds,
@@ -66,8 +66,8 @@ func (pageApp *PageApp) GetPageDetailBySlug(slug string) (*entity.Page, error) {
 	return page, nil
 }
 
-func (pageApp *PageApp) GetCategoryPageDetail(slug string, category *entity.Category) (*entity.Page, error) {
-	page, err := pageApp.GetPageDetailBySlug(slug)
+func (app *PageApp) GetCategoryPageDetail(slug string, category *entity.Category) (*entity.Page, error) {
+	page, err := app.GetPageDetailBySlug(slug)
 	if err != nil {
 		return nil, err
 	}
@@ -98,8 +98,8 @@ func (pageApp *PageApp) GetCategoryPageDetail(slug string, category *entity.Cate
 	return page, nil
 }
 
-func (pageApp *PageApp) GetTagPageDetail(slug string, tag *entity.Tag) (*entity.Page, error) {
-	page, err := pageApp.GetPageDetailBySlug(slug)
+func (app *PageApp) GetTagPageDetail(slug string, tag *entity.Tag) (*entity.Page, error) {
+	page, err := app.GetPageDetailBySlug(slug)
 	if err != nil {
 		return nil, err
 	}
@@ -124,8 +124,8 @@ func (pageApp *PageApp) GetTagPageDetail(slug string, tag *entity.Tag) (*entity.
 	return page, nil
 }
 
-func (pageApp *PageApp) GetSearchResultPageDetail(keyword string, currentPage int, searchResult []entity.PostList) (*entity.Page, error) {
-	page, err := pageApp.GetPageDetailBySlug("search")
+func (app *PageApp) GetSearchResultPageDetail(keyword string, currentPage int, searchResult []entity.PostList) (*entity.Page, error) {
+	page, err := app.GetPageDetailBySlug("search")
 	if err != nil {
 		return nil, err
 	}
@@ -211,33 +211,33 @@ func getSectionRelationIds(s []entity.Section) (catIds, loIds, ptIds, tIds, rIds
 	return catIds, loIds, ptIds, tIds, rIds, rcIds
 }
 
-func mapSectionType(pageApp *PageApp, sections []entity.Section, catIds, loIds, ptIds, tIds, rIds, rcIds []int64) []entity.Section {
-	categories, err := pageApp.CategoryRepo.GetCategoriesByIds(catIds)
+func mapSectionType(app *PageApp, sections []entity.Section, catIds, loIds, ptIds, tIds, rIds, rcIds []int64) []entity.Section {
+	categories, err := app.CategoryRepo.GetCategoriesByIds(catIds)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	linkouts, err := pageApp.LinkoutRepo.GetLinkoutsByIds(loIds)
+	linkouts, err := app.LinkoutRepo.GetLinkoutsByIds(loIds)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	tags, err := pageApp.TagRepo.GetTagByIds(tIds)
+	tags, err := app.TagRepo.GetTagByIds(tIds)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	ranks, err := pageApp.RankRepo.GetRanksByIds(rIds)
+	ranks, err := app.RankRepo.GetRanksByIds(rIds)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	rankCategories, err := pageApp.RankCategoryRepo.GetRankCategoryByIds(rcIds)
+	rankCategories, err := app.RankCategoryRepo.GetRankCategoryByIds(rcIds)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	postTypes, err := pageApp.PostTypeRepo.GetPostTypeByIds(ptIds)
+	postTypes, err := app.PostTypeRepo.GetPostTypeByIds(ptIds)
 	if err != nil {
 		panic(err.Error())
 	}

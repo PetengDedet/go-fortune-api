@@ -9,7 +9,7 @@ type MenuRepo struct {
 	DB *sqlx.DB
 }
 
-func (menuRepo *MenuRepo) GetMenuPositions() ([]entity.MenuPosition, error) {
+func (repo *MenuRepo) GetMenuPositions() ([]entity.MenuPosition, error) {
 	query := `
 		SELECT 
 			mp.id,
@@ -18,7 +18,7 @@ func (menuRepo *MenuRepo) GetMenuPositions() ([]entity.MenuPosition, error) {
 		FROM menu_positions mp
 	`
 
-	rows, err := menuRepo.DB.Query(query)
+	rows, err := repo.DB.Query(query)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func (menuRepo *MenuRepo) GetMenuPositions() ([]entity.MenuPosition, error) {
 	return menuPositions, nil
 }
 
-func (menuRepo *MenuRepo) GetMenusByPositionIds(positionIds []int) ([]entity.Menu, error) {
+func (repo *MenuRepo) GetMenusByPositionIds(positionIds []int) ([]entity.Menu, error) {
 	query, args, err := sqlx.In(`
 		SELECT 
 			m.id,
@@ -64,8 +64,8 @@ func (menuRepo *MenuRepo) GetMenusByPositionIds(positionIds []int) ([]entity.Men
 		return nil, err
 	}
 
-	query = menuRepo.DB.Rebind(query)
-	rows, err := menuRepo.DB.Query(query, args...)
+	query = repo.DB.Rebind(query)
+	rows, err := repo.DB.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +93,7 @@ func (menuRepo *MenuRepo) GetMenusByPositionIds(positionIds []int) ([]entity.Men
 	return menus, nil
 }
 
-func (menuRepo *MenuRepo) GetChildrenMenus(menuIds []int) ([]entity.Menu, error) {
+func (repo *MenuRepo) GetChildrenMenus(menuIds []int) ([]entity.Menu, error) {
 	query, args, err := sqlx.In(`
 		SELECT 
 			m.id,
@@ -116,8 +116,8 @@ func (menuRepo *MenuRepo) GetChildrenMenus(menuIds []int) ([]entity.Menu, error)
 		return nil, err
 	}
 
-	query = menuRepo.DB.Rebind(query)
-	rows, err := menuRepo.DB.Query(query, args...)
+	query = repo.DB.Rebind(query)
+	rows, err := repo.DB.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}

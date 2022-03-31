@@ -9,7 +9,7 @@ type TagRepo struct {
 	DB *sqlx.DB
 }
 
-func (tagRepo *TagRepo) GetTagByIds(ids []int64) ([]entity.Tag, error) {
+func (repo *TagRepo) GetTagByIds(ids []int64) ([]entity.Tag, error) {
 	if len(ids) == 0 {
 		return nil, nil
 	}
@@ -30,8 +30,8 @@ func (tagRepo *TagRepo) GetTagByIds(ids []int64) ([]entity.Tag, error) {
 		return nil, err
 	}
 
-	query = tagRepo.DB.Rebind(query)
-	rows, err := tagRepo.DB.Query(query, args...)
+	query = repo.DB.Rebind(query)
+	rows, err := repo.DB.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (tagRepo *TagRepo) GetTagByIds(ids []int64) ([]entity.Tag, error) {
 	return tags, nil
 }
 
-func (tagRepo *TagRepo) GetTagBySlug(slug string) (*entity.Tag, error) {
+func (repo *TagRepo) GetTagBySlug(slug string) (*entity.Tag, error) {
 	query := `
 		SELECT
 			id,
@@ -71,7 +71,7 @@ func (tagRepo *TagRepo) GetTagBySlug(slug string) (*entity.Tag, error) {
 		LIMIT 1
 	`
 
-	rows, err := tagRepo.DB.Query(query, slug)
+	rows, err := repo.DB.Query(query, slug)
 	if err != nil {
 		return nil, err
 	}

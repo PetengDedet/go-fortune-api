@@ -16,8 +16,8 @@ type CategoryApp struct {
 	PublishedPostRepo repository.PublishedPostRepository
 }
 
-func (categoryApp *CategoryApp) GetCategoryPageDetailBySlug(slug string) (*entity.Category, error) {
-	category, err := categoryApp.CategoryRepo.GetCategoryBySlug(slug)
+func (app *CategoryApp) GetCategoryPageDetailBySlug(slug string) (*entity.Category, error) {
+	category, err := app.CategoryRepo.GetCategoryBySlug(slug)
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +27,7 @@ func (categoryApp *CategoryApp) GetCategoryPageDetailBySlug(slug string) (*entit
 		return nil, &common.NotFoundError{}
 	}
 
-	ppc, err := categoryApp.PublishedPostRepo.GetPublishedPostCountByCategoryId(category.ID.Int64)
+	ppc, err := app.PublishedPostRepo.GetPublishedPostCountByCategoryId(category.ID.Int64)
 	if err != nil {
 		return nil, err
 	}

@@ -11,7 +11,7 @@ type SectionRepo struct {
 	DB *sqlx.DB
 }
 
-func (sectionRepo *SectionRepo) GetSectionsByPageId(pageId int64) ([]entity.Section, error) {
+func (repo *SectionRepo) GetSectionsByPageId(pageId int64) ([]entity.Section, error) {
 	query := `
 		SELECT 
 			s.id,
@@ -33,7 +33,7 @@ func (sectionRepo *SectionRepo) GetSectionsByPageId(pageId int64) ([]entity.Sect
 		ORDER BY ps.order_num ASC
 	`
 
-	rows, err := sectionRepo.DB.Query(query, pageId)
+	rows, err := repo.DB.Query(query, pageId)
 	if err != nil {
 		return nil, err
 	}

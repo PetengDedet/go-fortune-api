@@ -9,7 +9,7 @@ type LinkoutRepo struct {
 	DB *sqlx.DB
 }
 
-func (linkoutRepo *LinkoutRepo) GetLinkoutsByIds(linkoutIds []int64) ([]entity.Linkout, error) {
+func (repo *LinkoutRepo) GetLinkoutsByIds(linkoutIds []int64) ([]entity.Linkout, error) {
 	if len(linkoutIds) == 0 {
 		return nil, nil
 	}
@@ -27,8 +27,8 @@ func (linkoutRepo *LinkoutRepo) GetLinkoutsByIds(linkoutIds []int64) ([]entity.L
 		return nil, err
 	}
 
-	query = linkoutRepo.DB.Rebind(query)
-	rows, err := linkoutRepo.DB.Query(query, args...)
+	query = repo.DB.Rebind(query)
+	rows, err := repo.DB.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
