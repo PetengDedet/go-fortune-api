@@ -9,7 +9,7 @@ type RankRepo struct {
 	DB *sqlx.DB
 }
 
-func (rankRepo *RankRepo) GetRanksByIds(rankIds []int64) ([]entity.Rank, error) {
+func (repo *RankRepo) GetRanksByIds(rankIds []int64) ([]entity.Rank, error) {
 	if len(rankIds) == 0 {
 		return nil, nil
 	}
@@ -29,8 +29,8 @@ func (rankRepo *RankRepo) GetRanksByIds(rankIds []int64) ([]entity.Rank, error) 
 		return nil, err
 	}
 
-	query = rankRepo.DB.Rebind(query)
-	rows, err := rankRepo.DB.Query(query, args...)
+	query = repo.DB.Rebind(query)
+	rows, err := repo.DB.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}

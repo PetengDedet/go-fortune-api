@@ -9,7 +9,7 @@ type PostTypeRepo struct {
 	DB *sqlx.DB
 }
 
-func (postTypeRepo *PostTypeRepo) GetPostTypeByIds(ids []int64) ([]entity.PostType, error) {
+func (repo *PostTypeRepo) GetPostTypeByIds(ids []int64) ([]entity.PostType, error) {
 	if len(ids) == 0 {
 		return nil, nil
 	}
@@ -30,8 +30,8 @@ func (postTypeRepo *PostTypeRepo) GetPostTypeByIds(ids []int64) ([]entity.PostTy
 		return nil, err
 	}
 
-	query = postTypeRepo.DB.Rebind(query)
-	rows, err := postTypeRepo.DB.Query(query, args...)
+	query = repo.DB.Rebind(query)
+	rows, err := repo.DB.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (postTypeRepo *PostTypeRepo) GetPostTypeByIds(ids []int64) ([]entity.PostTy
 	return postTypes, nil
 }
 
-func (postTypeRepo *PostTypeRepo) GetPostTypeBySlug(slug string) (*entity.PostType, error) {
+func (repo *PostTypeRepo) GetPostTypeBySlug(slug string) (*entity.PostType, error) {
 	query := `
 		SELECT
 			id,
@@ -71,7 +71,7 @@ func (postTypeRepo *PostTypeRepo) GetPostTypeBySlug(slug string) (*entity.PostTy
 		LIMIT 1
 	`
 
-	rows, err := postTypeRepo.DB.Query(query, slug)
+	rows, err := repo.DB.Query(query, slug)
 	if err != nil {
 		panic(err)
 	}

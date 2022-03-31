@@ -93,29 +93,29 @@ func (repo *PublishedPostRepo) GetLatestPublishedPost(limit, skip int) ([]entity
 		return nil, err
 	}
 
-	var sr []entity.PostList
+	var pl []entity.PostList
 	for rows.Next() {
-		var art entity.PostList
+		var p entity.PostList
 		var cover entity.Cover
-		var srCat entity.SearchResultCategory
-		var srPt entity.SearchResultPostType
+		var cat entity.SearchResultCategory
+		var pt entity.SearchResultPostType
 		var publishAt string
 		var username *string
 		err := rows.Scan(
-			&art.ID,
-			&art.Title,
-			&art.Slug,
+			&p.ID,
+			&p.Title,
+			&p.Slug,
 			&publishAt,
-			&art.IsCSC,
-			&art.PostTypeID,
-			&art.CategoryID,
-			&art.CoverMediaID,
-			&art.CreatorID,
+			&p.IsCSC,
+			&p.PostTypeID,
+			&p.CategoryID,
+			&p.CoverMediaID,
+			&p.CreatorID,
 			&cover.UrlMedia,
-			&srCat.Name,
-			&srCat.Slug,
-			&srPt.Name,
-			&srPt.Slug,
+			&cat.Name,
+			&cat.Slug,
+			&pt.Name,
+			&pt.Slug,
 			&username,
 		)
 
@@ -123,23 +123,23 @@ func (repo *PublishedPostRepo) GetLatestPublishedPost(limit, skip int) ([]entity
 			panic(err)
 		}
 
-		srCat.Url = "/" + srCat.Slug
-		art.Category = &srCat
-		art.Cover = cover.GetPredefinedSize()
-		art.PostType = &srPt
+		cat.Url = "/" + cat.Slug
+		p.Category = &cat
+		p.Cover = cover.GetPredefinedSize()
+		p.PostType = &pt
 
 		t, err := time.Parse(time.RFC3339, publishAt)
 		if err != nil {
 			panic(err)
 		}
-		art.ReleaseDate = t.Unix()
+		p.ReleaseDate = t.Unix()
 
-		art.ArticleUrl = "/" + srCat.Slug + "/" + *username + "/" + art.Slug
+		p.ArticleUrl = "/" + cat.Slug + "/" + *username + "/" + p.Slug
 
-		sr = append(sr, art)
+		pl = append(pl, p)
 	}
 
-	return sr, nil
+	return pl, nil
 }
 
 func (repo *PublishedPostRepo) GetPopularPosts() ([]entity.PostList, error) {
@@ -175,30 +175,30 @@ func (repo *PublishedPostRepo) GetPopularPosts() ([]entity.PostList, error) {
 		return nil, err
 	}
 
-	var sr []entity.PostList
+	var pl []entity.PostList
 	for rows.Next() {
-		var art entity.PostList
+		var p entity.PostList
 		var cover entity.Cover
-		var srCat entity.SearchResultCategory
-		var srPt entity.SearchResultPostType
+		var cat entity.SearchResultCategory
+		var pt entity.SearchResultPostType
 		var publishAt string
 		var username *string
 		err := rows.Scan(
-			&art.ID,
-			&art.Title,
-			&art.Slug,
+			&p.ID,
+			&p.Title,
+			&p.Slug,
 			&publishAt,
-			&art.IsCSC,
-			&art.PostTypeID,
-			&art.CategoryID,
-			&art.CoverMediaID,
-			&art.CreatorID,
-			&art.Excerpt,
+			&p.IsCSC,
+			&p.PostTypeID,
+			&p.CategoryID,
+			&p.CoverMediaID,
+			&p.CreatorID,
+			&p.Excerpt,
 			&cover.UrlMedia,
-			&srCat.Name,
-			&srCat.Slug,
-			&srPt.Name,
-			&srPt.Slug,
+			&cat.Name,
+			&cat.Slug,
+			&pt.Name,
+			&pt.Slug,
 			&username,
 		)
 
@@ -206,23 +206,23 @@ func (repo *PublishedPostRepo) GetPopularPosts() ([]entity.PostList, error) {
 			panic(err)
 		}
 
-		srCat.Url = "/" + srCat.Slug
-		art.Category = &srCat
-		art.Cover = cover.GetPredefinedSize()
-		art.PostType = &srPt
+		cat.Url = "/" + cat.Slug
+		p.Category = &cat
+		p.Cover = cover.GetPredefinedSize()
+		p.PostType = &pt
 
 		t, err := time.Parse(time.RFC3339, publishAt)
 		if err != nil {
 			panic(err)
 		}
-		art.ReleaseDate = t.Unix()
+		p.ReleaseDate = t.Unix()
 
-		art.ArticleUrl = "/" + srCat.Slug + "/" + *username + "/" + art.Slug
+		p.ArticleUrl = "/" + cat.Slug + "/" + *username + "/" + p.Slug
 
-		sr = append(sr, art)
+		pl = append(pl, p)
 	}
 
-	return sr, nil
+	return pl, nil
 }
 
 func (repo *PublishedPostRepo) GetLatestPublishedPostByCategoryId(limit, skip int, categoryId int64) ([]entity.PostList, error) {
@@ -523,31 +523,31 @@ func (repo *PublishedPostRepo) SearchPublishedPostByKeyword(keyword string, limi
 		return nil, err
 	}
 
-	var sr []entity.PostList
+	var pl []entity.PostList
 	for rows.Next() {
-		var art entity.PostList
+		var p entity.PostList
 		var cover entity.Cover
-		var srCat entity.SearchResultCategory
-		var srPt entity.SearchResultPostType
+		var cat entity.SearchResultCategory
+		var pt entity.SearchResultPostType
 		var publishAt string
 		var rel *string
 		var lessRel *string
 		var username *string
 		err := rows.Scan(
-			&art.ID,
-			&art.Title,
-			&art.Slug,
+			&p.ID,
+			&p.Title,
+			&p.Slug,
 			&publishAt,
-			&art.IsCSC,
-			&art.PostTypeID,
-			&art.CategoryID,
-			&art.CoverMediaID,
-			&art.CreatorID,
+			&p.IsCSC,
+			&p.PostTypeID,
+			&p.CategoryID,
+			&p.CoverMediaID,
+			&p.CreatorID,
 			&cover.UrlMedia,
-			&srCat.Name,
-			&srCat.Slug,
-			&srPt.Name,
-			&srPt.Slug,
+			&cat.Name,
+			&cat.Slug,
+			&pt.Name,
+			&pt.Slug,
 			&username,
 			&rel,
 			&lessRel,
@@ -557,23 +557,23 @@ func (repo *PublishedPostRepo) SearchPublishedPostByKeyword(keyword string, limi
 			panic(err)
 		}
 
-		srCat.Url = "/" + srCat.Slug
-		art.Category = &srCat
-		art.Cover = cover.GetPredefinedSize()
-		art.PostType = &srPt
+		cat.Url = "/" + cat.Slug
+		p.Category = &cat
+		p.Cover = cover.GetPredefinedSize()
+		p.PostType = &pt
 
 		t, err := time.Parse(time.RFC3339, publishAt)
 		if err != nil {
 			panic(err)
 		}
-		art.ReleaseDate = t.Unix()
+		p.ReleaseDate = t.Unix()
 
-		art.ArticleUrl = "/" + srCat.Slug + "/" + *username + "/" + art.Slug
+		p.ArticleUrl = "/" + cat.Slug + "/" + *username + "/" + p.Slug
 
-		sr = append(sr, art)
+		pl = append(pl, p)
 	}
 
-	return sr, nil
+	return pl, nil
 }
 
 /*

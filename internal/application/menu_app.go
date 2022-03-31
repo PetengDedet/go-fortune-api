@@ -15,10 +15,10 @@ type MenuApp struct {
 	RankRepo     repository.RankRepository
 }
 
-func (ma *MenuApp) GetPublicMenuPositions() ([]entity.MenuPosition, error) {
+func (app *MenuApp) GetPublicMenuPositions() ([]entity.MenuPosition, error) {
 	var menuPositions []entity.MenuPosition
 
-	menuPost, err := ma.MenuRepo.GetMenuPositions()
+	menuPost, err := app.MenuRepo.GetMenuPositions()
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +29,7 @@ func (ma *MenuApp) GetPublicMenuPositions() ([]entity.MenuPosition, error) {
 
 	positionIds := getMenuPositionIds(menuPost)
 
-	parentMenus, err := ma.MenuRepo.GetMenusByPositionIds(positionIds)
+	parentMenus, err := app.MenuRepo.GetMenusByPositionIds(positionIds)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +37,7 @@ func (ma *MenuApp) GetPublicMenuPositions() ([]entity.MenuPosition, error) {
 
 	catIds, loIds, pageIds, rankIds := getMenuRelationIds(parentMenus)
 	parentMenus = mapMenuType(
-		ma,
+		app,
 		parentMenus,
 		catIds,
 		loIds,
@@ -46,14 +46,14 @@ func (ma *MenuApp) GetPublicMenuPositions() ([]entity.MenuPosition, error) {
 	)
 
 	parentMenuIds := getParentMenuIds(parentMenus)
-	childrenMenus, err := ma.MenuRepo.GetChildrenMenus(parentMenuIds)
+	childrenMenus, err := app.MenuRepo.GetChildrenMenus(parentMenuIds)
 	if err != nil {
 		return nil, err
 	}
 
 	cIds, lIds, pIds, rkIds := getMenuRelationIds(childrenMenus)
 	childrenMenus = mapMenuType(
-		ma,
+		app,
 		childrenMenus,
 		cIds,
 		lIds,
@@ -111,23 +111,23 @@ func getMenuRelationIds(m []entity.Menu) (catIds, loIds, pageIds, rankIds []int6
 	return catIds, loIds, pageIds, rankIds
 }
 
-func mapMenuType(ma *MenuApp, menus []entity.Menu, catIds, loIds, pageIds, rankIds []int64) []entity.Menu {
-	categories, err := ma.CategoryRepo.GetCategoriesByIds(catIds)
+func mapMenuType(app *MenuApp, menus []entity.Menu, catIds, loIds, pageIds, rankIds []int64) []entity.Menu {
+	categories, err := app.CategoryRepo.GetCategoriesByIds(catIds)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	linkouts, err := ma.LinkoutRepo.GetLinkoutsByIds(loIds)
+	linkouts, err := app.LinkoutRepo.GetLinkoutsByIds(loIds)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	pages, err := ma.PageRepo.GetPagesByIds(pageIds)
+	pages, err := app.PageRepo.GetPagesByIds(pageIds)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	ranks, err := ma.RankRepo.GetRanksByIds(rankIds)
+	ranks, err := app.RankRepo.GetRanksByIds(rankIds)
 	if err != nil {
 		panic(err.Error())
 	}

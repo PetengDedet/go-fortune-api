@@ -9,7 +9,7 @@ type RankCategoryRepo struct {
 	DB *sqlx.DB
 }
 
-func (rankCategoryRepo *RankCategoryRepo) GetRankCategoryByIds(ids []int64) ([]entity.RankCategory, error) {
+func (repo *RankCategoryRepo) GetRankCategoryByIds(ids []int64) ([]entity.RankCategory, error) {
 	if len(ids) == 0 {
 		return nil, nil
 	}
@@ -31,8 +31,8 @@ func (rankCategoryRepo *RankCategoryRepo) GetRankCategoryByIds(ids []int64) ([]e
 		return nil, err
 	}
 
-	query = rankCategoryRepo.DB.Rebind(query)
-	rows, err := rankCategoryRepo.DB.Query(query, args...)
+	query = repo.DB.Rebind(query)
+	rows, err := repo.DB.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}

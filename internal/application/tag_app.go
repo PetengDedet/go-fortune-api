@@ -16,8 +16,8 @@ type TagApp struct {
 	PublishedPostRepo repository.PublishedPostRepository
 }
 
-func (ta *TagApp) GetTagDetail(tagSlug string) (*entity.Tag, error) {
-	tag, err := ta.TagRepo.GetTagBySlug(tagSlug)
+func (app *TagApp) GetTagDetail(tagSlug string) (*entity.Tag, error) {
+	tag, err := app.TagRepo.GetTagBySlug(tagSlug)
 	if err != nil {
 		panic(err)
 	}
@@ -27,7 +27,7 @@ func (ta *TagApp) GetTagDetail(tagSlug string) (*entity.Tag, error) {
 		return nil, &common.NotFoundError{}
 	}
 
-	ppc, err := ta.PublishedPostRepo.GetPublishedPostCountByTagId(tag.ID)
+	ppc, err := app.PublishedPostRepo.GetPublishedPostCountByTagId(tag.ID)
 	if err != nil {
 		return nil, err
 	}

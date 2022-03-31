@@ -11,7 +11,7 @@ type PageRepo struct {
 	DB *sqlx.DB
 }
 
-func (pageRepo *PageRepo) GetPageBySlug(slug string) (*entity.Page, error) {
+func (repo *PageRepo) GetPageBySlug(slug string) (*entity.Page, error) {
 	query := `
 		SELECT
 			p.id,
@@ -28,7 +28,7 @@ func (pageRepo *PageRepo) GetPageBySlug(slug string) (*entity.Page, error) {
 		LIMIT 1
 	`
 
-	rows, err := pageRepo.DB.Query(query, 1, slug)
+	rows, err := repo.DB.Query(query, 1, slug)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func (pageRepo *PageRepo) GetPageBySlug(slug string) (*entity.Page, error) {
 	return page, nil
 }
 
-func (pageRepo *PageRepo) GetPagesByIds(pageIds []int64) ([]entity.Page, error) {
+func (repo *PageRepo) GetPagesByIds(pageIds []int64) ([]entity.Page, error) {
 	if len(pageIds) == 0 {
 		return nil, nil
 	}
@@ -77,8 +77,8 @@ func (pageRepo *PageRepo) GetPagesByIds(pageIds []int64) ([]entity.Page, error) 
 		return nil, err
 	}
 
-	query = pageRepo.DB.Rebind(query)
-	rows, err := pageRepo.DB.Query(query, args...)
+	query = repo.DB.Rebind(query)
+	rows, err := repo.DB.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
