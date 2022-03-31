@@ -108,6 +108,8 @@ func Init() {
 	publishedPostApp := application.PublishedPostApp{
 		PublishePostRepo: &publishedPostRepo,
 		UserRepo:         &userRepo,
+		CategoryRepo:     &categoryRepo,
+		TagRepo:          &tagRepo,
 	}
 	keywordMongoApp := application.KeywordApp{
 		KeywordRepo: &keywordMongoRepo,
@@ -135,6 +137,7 @@ func Init() {
 		v1.GET("/popular-keyword", NewKeywordHandler(&keywordApp).GetPopularKeywordHandler)
 		v1.GET("/content-type/:postTypeSlug", NewPostTypeHandler(postTypeApp, pageApp).GetPostTypePageHandler)
 		v1.GET("/most-popular", NewPublishedPostHandler(publishedPostApp).GetMostPopularPostHandler)
+		v1.GET("/related-articles", NewPublishedPostHandler(publishedPostApp).GetRelatedArticlesHandler)
 
 		latest := route.Group("/latest")
 		{

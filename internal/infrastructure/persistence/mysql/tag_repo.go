@@ -94,3 +94,23 @@ func (tagRepo *TagRepo) GetTagBySlug(slug string) (*entity.Tag, error) {
 
 	return t, nil
 }
+
+func (repo *TagRepo) GetPostIdsByTagId(id int64) ([]int64, error) {
+	query := "SELECT post_id FROM post_tags WHERE tag_id = ?"
+	rows, err := repo.DB.Query(query, id)
+	if err != nil {
+		return nil, err
+	}
+
+	var postIds = []int64{}
+	for rows.Next() {
+		var pid int64
+		err := rows.Scan(&pid)
+		if err != nil {
+			panic(err)
+		}
+		postIds = append(postIds, pid)
+	}
+
+	return postIds, nil
+}
