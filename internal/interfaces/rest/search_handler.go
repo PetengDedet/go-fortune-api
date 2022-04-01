@@ -8,7 +8,7 @@ import (
 
 	"github.com/PetengDedet/fortune-post-api/internal/application"
 	"github.com/PetengDedet/fortune-post-api/internal/common"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 )
 
 type SearchHandler struct {
@@ -23,16 +23,12 @@ func NewSearchHandler(searchApp application.SearchApp, pageApp application.PageA
 	}
 }
 
-func (handler *SearchHandler) GetSearchResultHandler(c *gin.Context) {
-	keyword, ok := c.GetQuery("keyword")
-	if !ok {
-		keyword = ""
-		// TODO: get latest article
-	}
+func (handler *SearchHandler) GetSearchResultHandler(c echo.Context) error {
+	keyword := c.QueryParam("keyword")
 	keyword = strings.TrimSpace(keyword)
 
-	pageParam, ok := c.GetQuery("page")
-	if !ok {
+	pageParam := c.QueryParam("page")
+	if len(pageParam) <= 0 {
 		pageParam = "1"
 	}
 
@@ -43,20 +39,17 @@ func (handler *SearchHandler) GetSearchResultHandler(c *gin.Context) {
 
 	searchResult, err := handler.SearchApp.GetSearchResult(keyword, currentPage)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
-		return
+		return c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
 	}
 
 	searchPage, err := handler.PageApp.GetSearchResultPageDetail(keyword, currentPage, searchResult)
 	if err != nil {
 		if errors.Is(&common.NotFoundError{}, err) {
-			c.JSON(http.StatusNotFound, NotFoundResponse(nil))
-			return
+			return c.JSON(http.StatusNotFound, NotFoundResponse(nil))
 		}
 
-		c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
-		return
+		return c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
 	}
 
-	c.JSON(http.StatusOK, SuccessResponse(searchPage))
+	return c.JSON(http.StatusOK, SuccessResponse(searchPage))
 }

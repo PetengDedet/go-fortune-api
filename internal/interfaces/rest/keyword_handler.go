@@ -6,8 +6,8 @@ import (
 
 	"github.com/PetengDedet/fortune-post-api/internal/application"
 	"github.com/PetengDedet/fortune-post-api/internal/common"
-	"github.com/PetengDedet/fortune-post-api/internal/domain/entity"
 	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 )
 
 type KeywordHandler struct {
@@ -20,34 +20,30 @@ func NewKeywordHandler(keywordApp *application.KeywordApp) *KeywordHandler {
 	}
 }
 
-func (handler *KeywordHandler) SaveKeywordHandler(c *gin.Context) {
-	kw := &entity.KeywordHistory{}
+func (handler *KeywordHandler) SaveKeywordHandler(c echo.Context) error {
+	// kw := &entity.KeywordHistory{}
 
-	if err := c.ShouldBindJSON(&kw); err != nil {
-		c.JSON(http.StatusBadRequest, BadRequestResponse("keyword needed", "keyword needed"))
-		return
-	}
+	// if err := c.bi ShouldBindJSON(&kw); err != nil {
+	// 	return c.JSON(http.StatusBadRequest, BadRequestResponse("keyword needed", "keyword needed"))
+	// }
 
-	err := handler.KeywordApp.SaveKeyword(kw.Keyword)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
-		return
-	}
+	// err := handler.KeywordApp.SaveKeyword(kw.Keyword)
+	// if err != nil {
+	// 	return c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
+	// }
 
-	c.JSON(http.StatusOK, SuccessResponse(gin.H{}))
+	return c.JSON(http.StatusOK, SuccessResponse(gin.H{}))
 }
 
-func (handler *KeywordHandler) GetPopularKeywordHandler(c *gin.Context) {
+func (handler *KeywordHandler) GetPopularKeywordHandler(c echo.Context) error {
 	kw, err := handler.KeywordApp.GetPopularKeyword()
 	if err != nil {
 		if errors.Is(&common.NotFoundError{}, err) {
-			c.JSON(http.StatusNotFound, NotFoundResponse(nil))
-			return
+			return c.JSON(http.StatusNotFound, NotFoundResponse(nil))
 		}
 
-		c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
-		return
+		return c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
 	}
 
-	c.JSON(http.StatusOK, SuccessResponse(kw))
+	return c.JSON(http.StatusOK, SuccessResponse(kw))
 }

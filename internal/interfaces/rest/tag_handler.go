@@ -6,7 +6,7 @@ import (
 
 	"github.com/PetengDedet/fortune-post-api/internal/application"
 	"github.com/PetengDedet/fortune-post-api/internal/common"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 )
 
 type TagHandler struct {
@@ -21,29 +21,25 @@ func NewTagHandler(tagApp application.TagApp, pageApp application.PageApp) *TagH
 	}
 }
 
-func (handler *TagHandler) GetTagPageDetailHandler(c *gin.Context) {
+func (handler *TagHandler) GetTagPageDetailHandler(c echo.Context) error {
 	slug := c.Param("tagSlug")
 	tag, err := handler.TagApp.GetTagDetail(slug)
 	if err != nil {
 		if errors.Is(err, &common.NotFoundError{}) {
-			c.JSON(http.StatusNotFound, NotFoundResponse(nil))
-			return
+			return c.JSON(http.StatusNotFound, NotFoundResponse(nil))
 		}
 
-		c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
-		return
+		return c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
 	}
 
 	tagPage, err := handler.PageApp.GetTagPageDetail("tag", tag)
 	if err != nil {
 		if errors.Is(&common.NotFoundError{}, err) {
-			c.JSON(http.StatusNotFound, NotFoundResponse(nil))
-			return
+			return c.JSON(http.StatusNotFound, NotFoundResponse(nil))
 		}
 
-		c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
-		return
+		return c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
 	}
 
-	c.JSON(http.StatusOK, SuccessResponse(tagPage))
+	return c.JSON(http.StatusOK, SuccessResponse(tagPage))
 }

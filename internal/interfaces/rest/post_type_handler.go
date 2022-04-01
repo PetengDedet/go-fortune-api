@@ -6,7 +6,7 @@ import (
 
 	"github.com/PetengDedet/fortune-post-api/internal/application"
 	"github.com/PetengDedet/fortune-post-api/internal/common"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 )
 
 type PostTypeHandler struct {
@@ -21,36 +21,31 @@ func NewPostTypeHandler(postTypeApp application.PostTypeApp, pageApp application
 	}
 }
 
-func (handler *PostTypeHandler) GetPostTypePageHandler(c *gin.Context) {
+func (handler *PostTypeHandler) GetPostTypePageHandler(c echo.Context) error {
 	slug := c.Param("postTypeSlug")
 	if len(slug) == 0 {
-		c.JSON(http.StatusNotFound, NotFoundResponse(nil))
-		return
+		return c.JSON(http.StatusNotFound, NotFoundResponse(nil))
 	}
 
 	postType, err := handler.PostTypeApp.GetPostTypeDetail(slug)
 	if err != nil {
 		if errors.Is(err, &common.NotFoundError{}) {
-			c.JSON(http.StatusNotFound, nil)
-			return
+			return c.JSON(http.StatusNotFound, nil)
 		}
 
-		c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
-		return
+		return c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
 	}
 
 	page, err := handler.PageApp.GetPostTypePageDetail(postType)
 	if err != nil {
 		if err != nil {
 			if errors.Is(err, &common.NotFoundError{}) {
-				c.JSON(http.StatusNotFound, nil)
-				return
+				return c.JSON(http.StatusNotFound, nil)
 			}
 
-			c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
-			return
+			return c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
 		}
 	}
 
-	c.JSON(http.StatusOK, SuccessResponse(page))
+	return c.JSON(http.StatusOK, SuccessResponse(page))
 }
