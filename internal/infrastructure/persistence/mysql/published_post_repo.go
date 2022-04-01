@@ -97,8 +97,8 @@ func (repo *PublishedPostRepo) GetLatestPublishedPost(limit, skip int) ([]entity
 	for rows.Next() {
 		var p entity.PostList
 		var cover entity.Cover
-		var cat entity.SearchResultCategory
-		var pt entity.SearchResultPostType
+		var cat entity.CategoryList
+		var pt entity.PostTypeList
 		var publishAt string
 		var username *string
 		err := rows.Scan(
@@ -179,8 +179,8 @@ func (repo *PublishedPostRepo) GetPopularPosts() ([]entity.PostList, error) {
 	for rows.Next() {
 		var p entity.PostList
 		var cover entity.Cover
-		var cat entity.SearchResultCategory
-		var pt entity.SearchResultPostType
+		var cat entity.CategoryList
+		var pt entity.PostTypeList
 		var publishAt string
 		var username *string
 		err := rows.Scan(
@@ -263,8 +263,8 @@ func (repo *PublishedPostRepo) GetLatestPublishedPostByCategoryId(limit, skip in
 	for rows.Next() {
 		var p entity.PostList
 		var cover entity.Cover
-		var cat entity.SearchResultCategory
-		var pt entity.SearchResultPostType
+		var cat entity.CategoryList
+		var pt entity.PostTypeList
 		var publishAt string
 		var username *string
 		err := rows.Scan(
@@ -350,8 +350,8 @@ func (repo *PublishedPostRepo) GetLatestPublishedPostByTagId(limit, skip int, ta
 	for rows.Next() {
 		var p entity.PostList
 		var cover entity.Cover
-		var cat entity.SearchResultCategory
-		var pt entity.SearchResultPostType
+		var cat entity.CategoryList
+		var pt entity.PostTypeList
 		var publishAt string
 		var username *string
 		err := rows.Scan(
@@ -437,8 +437,8 @@ func (repo *PublishedPostRepo) GetLatestPublishedPostByCategoryIdAndTagId(limit,
 	for rows.Next() {
 		var p entity.PostList
 		var cover entity.Cover
-		var cat entity.SearchResultCategory
-		var pt entity.SearchResultPostType
+		var cat entity.CategoryList
+		var pt entity.PostTypeList
 		var publishAt string
 		var username *string
 		err := rows.Scan(
@@ -527,8 +527,8 @@ func (repo *PublishedPostRepo) SearchPublishedPostByKeyword(keyword string, limi
 	for rows.Next() {
 		var p entity.PostList
 		var cover entity.Cover
-		var cat entity.SearchResultCategory
-		var pt entity.SearchResultPostType
+		var cat entity.CategoryList
+		var pt entity.PostTypeList
 		var publishAt string
 		var rel *string
 		var lessRel *string

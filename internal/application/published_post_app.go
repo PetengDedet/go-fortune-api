@@ -8,15 +8,13 @@ import (
 	"github.com/PetengDedet/fortune-post-api/internal/domain/repository"
 )
 
-type PublishedPostAppInterface interface {
-	GetMostPopularPosts() ([]entity.PostList, error)
-}
-
 type PublishedPostApp struct {
 	PublishePostRepo repository.PublishedPostRepository
 	UserRepo         repository.UserRepository
 	TagRepo          repository.TagRepository
 	CategoryRepo     repository.CategoryRepository
+	PostDetailRepo   repository.PostDetailRepository
+	MediaRepo        repository.MediaRepository
 }
 
 func (app *PublishedPostApp) GetMostPopularPosts() ([]entity.PostList, error) {
@@ -126,6 +124,11 @@ func (app *PublishedPostApp) GeRelatedPosts(page, tagSlug, categorySlug string) 
 	pl = mapAuthorToPost(pl, authors)
 
 	return pl, e
+}
+
+func (app *PublishedPostApp) GetPostDetails(categorySlug, authorSlug, postSlug string) (*entity.PublishedPost, error) {
+
+	return nil, nil
 }
 
 func mapAuthorToPost(posts []entity.PostList, authors []entity.Author) []entity.PostList {

@@ -19,7 +19,7 @@ type Category struct {
 	PublishedPostCount int64 `json:"-" db:"-"`
 }
 
-type SearchResultCategory struct {
+type CategoryList struct {
 	Name string `json:"name"`
 	Slug string `json:"slug"`
 	Url  string `json:"url"`

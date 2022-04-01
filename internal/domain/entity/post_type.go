@@ -16,7 +16,7 @@ type PostType struct {
 	PublishedPostCount int64  `json:"-" db:"-"`
 }
 
-type SearchResultPostType struct {
+type PostTypeList struct {
 	Name string `json:"name" db:"name"`
 	Slug string `json:"slug" db:"slug"`
 }

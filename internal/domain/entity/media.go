@@ -73,3 +73,15 @@ func (c *Cover) GetPredefinedSize() *Cover {
 
 	return c
 }
+
+type CoverDetail struct {
+	Large       null.String `json:"large"`
+	Medium      null.String `json:"medium"`
+	Small       null.String `json:"small"`
+	Tiny        null.String `json:"tiny"`
+	SourceName  null.String `json:"source_name"`
+	SourceUrl   null.String `json:"source_url"`
+	Description null.String `json:"description"`
+	Height      int64       `json:"height"`
+	Width       int64       `json:"width"`
+}

@@ -69,6 +69,12 @@ func Init() {
 	userRepo := mysql.UserRepo{
 		DB: db,
 	}
+	postDetailRepo := mysql.PostDetailRepo{
+		DB: db,
+	}
+	mediaRepo := mysql.MediaRepo{
+		DB: db,
+	}
 
 	// Apps
 	menuApp := application.MenuApp{
@@ -111,6 +117,8 @@ func Init() {
 		UserRepo:         &userRepo,
 		CategoryRepo:     &categoryRepo,
 		TagRepo:          &tagRepo,
+		PostDetailRepo:   &postDetailRepo,
+		MediaRepo:        &mediaRepo,
 	}
 	keywordMongoApp := application.KeywordApp{
 		KeywordRepo: &keywordMongoRepo,
