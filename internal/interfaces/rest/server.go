@@ -8,6 +8,7 @@ import (
 	"github.com/PetengDedet/fortune-post-api/internal/infrastructure/persistence/mongodb"
 	"github.com/PetengDedet/fortune-post-api/internal/infrastructure/persistence/mysql"
 	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 )
 
 func Init() {
@@ -118,48 +119,51 @@ func Init() {
 		KeywordRepo: &keywordRepo,
 	}
 
-	route := gin.Default()
+	// Echo instance
+	e := echo.New()
 
-	route.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
+	// Middleware
+	// e.Use(middleware.Logger())
+	// e.Use(middleware.Recover())
+
+	e.GET("/", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, gin.H{
 			"status": "OK",
 			"app":    "Fortune API",
 		})
 	})
 
-	v1 := route.Group("/v1")
+	v1 := e.Group("/v1")
+	v1.GET("/menu", NewMenuHandler(menuApp).GetPublicMenuPositionsHandler)
+	v1.GET("/category/:categorySlug", NewCategoryHandler(categoryApp, pageApp).GetCategoryPageDetailHandler)
+	v1.GET("/tag/:tagSlug", NewTagHandler(tagApp, pageApp).GetTagPageDetailHandler)
+	v1.GET("/search", NewSearchHandler(searchApp, pageApp).GetSearchResultHandler)
+	v1.POST("/search", NewKeywordHandler(&keywordMongoApp).SaveKeywordHandler)
+	v1.GET("/popular-keyword", NewKeywordHandler(&keywordApp).GetPopularKeywordHandler)
+	v1.GET("/content-type/:postTypeSlug", NewPostTypeHandler(postTypeApp, pageApp).GetPostTypePageHandler)
+	v1.GET("/most-popular", NewPublishedPostHandler(publishedPostApp).GetMostPopularPostHandler)
+	v1.GET("/related-articles", NewPublishedPostHandler(publishedPostApp).GetRelatedArticlesHandler)
+
+	latest := v1.Group("/latest")
 	{
-		v1.GET("/menu", NewMenuHandler(menuApp).GetPublicMenuPositionsHandler)
-		v1.GET("/category/:categorySlug", NewCategoryHandler(categoryApp, pageApp).GetCategoryPageDetailHandler)
-		v1.GET("/tag/:tagSlug", NewTagHandler(tagApp, pageApp).GetTagPageDetailHandler)
-		v1.GET("/search", NewSearchHandler(searchApp, pageApp).GetSearchResultHandler)
-		v1.POST("/search", NewKeywordHandler(&keywordMongoApp).SaveKeywordHandler)
-		v1.GET("/popular-keyword", NewKeywordHandler(&keywordApp).GetPopularKeywordHandler)
-		v1.GET("/content-type/:postTypeSlug", NewPostTypeHandler(postTypeApp, pageApp).GetPostTypePageHandler)
-		v1.GET("/most-popular", NewPublishedPostHandler(publishedPostApp).GetMostPopularPostHandler)
-		v1.GET("/related-articles", NewPublishedPostHandler(publishedPostApp).GetRelatedArticlesHandler)
-
-		latest := route.Group("/latest")
-		{
-			latest.GET("/", func(c *gin.Context) {
-				c.JSON(http.StatusOK, gin.H{
-					"route": "/v1/latest",
-				})
+		latest.GET("/", func(c echo.Context) error {
+			return c.JSON(http.StatusOK, gin.H{
+				"route": "/v1/latest",
 			})
-			latest.GET("/homepage/tag/:slug", func(c *gin.Context) {
-				c.JSON(http.StatusOK, gin.H{
-					"route": "/v1/latest/homepage/tag/" + c.Param("slug"),
-				})
+		})
+		latest.GET("/homepage/tag/:slug", func(c echo.Context) error {
+			return c.JSON(http.StatusOK, gin.H{
+				"route": "/v1/latest/homepage/tag/" + c.Param("slug"),
 			})
-			latest.GET("/homepage/content-type/:slug", func(c *gin.Context) {
-				c.JSON(http.StatusOK, gin.H{
-					"route": "/v1/latest/homepage/content-type/" + c.Param("slug"),
-				})
+		})
+		latest.GET("/homepage/content-type/:slug", func(c echo.Context) error {
+			return c.JSON(http.StatusOK, gin.H{
+				"route": "/v1/latest/homepage/content-type/" + c.Param("slug"),
 			})
-		}
-
-		v1.GET("/:pageSlug", NewPageHandler(pageApp).GetPageBySlugHandler)
+		})
 	}
 
-	route.Run(":8000")
+	v1.GET("/:pageSlug", NewPageHandler(pageApp).GetPageBySlugHandler)
+
+	e.Logger.Fatal(e.Start(":8000"))
 }

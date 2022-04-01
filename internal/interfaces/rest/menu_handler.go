@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/PetengDedet/fortune-post-api/internal/application"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 )
 
 type MenuHandler struct {
@@ -17,13 +17,11 @@ func NewMenuHandler(menuApp application.MenuApp) *MenuHandler {
 	}
 }
 
-func (menuHandler *MenuHandler) GetPublicMenuPositionsHandler(c *gin.Context) {
+func (menuHandler *MenuHandler) GetPublicMenuPositionsHandler(c echo.Context) error {
 	publicMenuPosition, err := menuHandler.MenuApp.GetPublicMenuPositions()
 	if err != nil {
-
-		c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
-		return
+		return c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
 	}
 
-	c.JSON(http.StatusOK, SuccessResponse(publicMenuPosition))
+	return c.JSON(http.StatusOK, SuccessResponse(publicMenuPosition))
 }

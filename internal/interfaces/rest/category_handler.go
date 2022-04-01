@@ -6,7 +6,7 @@ import (
 
 	"github.com/PetengDedet/fortune-post-api/internal/application"
 	"github.com/PetengDedet/fortune-post-api/internal/common"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 )
 
 type CategoryHandler struct {
@@ -21,29 +21,25 @@ func NewCategoryHandler(categoryApp application.CategoryApp, pageApp application
 	}
 }
 
-func (handler *CategoryHandler) GetCategoryPageDetailHandler(c *gin.Context) {
+func (handler *CategoryHandler) GetCategoryPageDetailHandler(c echo.Context) error {
 	slug := c.Param("categorySlug")
 	category, err := handler.CategoryApp.GetCategoryPageDetailBySlug(slug)
 	if err != nil {
 		if errors.Is(err, &common.NotFoundError{}) {
-			c.JSON(http.StatusNotFound, NotFoundResponse(nil))
-			return
+			return c.JSON(http.StatusNotFound, NotFoundResponse(nil))
 		}
 
-		c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
-		return
+		return c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
 	}
 
 	categoryPage, err := handler.PageApp.GetCategoryPageDetail("category", category)
 	if err != nil {
 		if errors.Is(&common.NotFoundError{}, err) {
-			c.JSON(http.StatusNotFound, NotFoundResponse(nil))
-			return
+			return c.JSON(http.StatusNotFound, NotFoundResponse(nil))
 		}
 
-		c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
-		return
+		return c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
 	}
 
-	c.JSON(http.StatusOK, SuccessResponse(categoryPage))
+	return c.JSON(http.StatusOK, SuccessResponse(categoryPage))
 }
