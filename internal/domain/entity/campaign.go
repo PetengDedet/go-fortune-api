@@ -3,9 +3,9 @@ package entity
 import "gopkg.in/guregu/null.v4"
 
 type Campaign struct {
-	ID   int64  `json:"-" db:"id"`
-	Name string `json:"name" db:"name"`
-	Slug string `json:"slug" db:"slug"`
+	ID   int64       `json:"-" db:"id"`
+	Name null.String `json:"name" db:"name"`
+	Slug null.String `json:"slug" db:"slug"`
 
 	MediaID         null.Int  `json:"-" db:"media_id"`
 	GeneralStatusID int64     `json:"-" db:"general_status_id"`

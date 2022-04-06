@@ -15,7 +15,7 @@ import (
 func GetConnection(DBHost, DBPort, DBName, DBUsername, DBPassword string) (*sqlx.DB, error) {
 	DBDSN := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", DBUsername, DBPassword, DBHost, DBPort, DBName)
 	db, err := sql.Open("mysql", DBDSN)
-	loggerAdapter := zerologadapter.New(zerolog.New(os.Stdout))
+	loggerAdapter := zerologadapter.New(zerolog.New(os.Stdout).With().Timestamp().Logger())
 	db = sqldblogger.OpenDriver(DBDSN, db.Driver(), loggerAdapter)
 	newDb := sqlx.NewDb(db, "mysql")
 

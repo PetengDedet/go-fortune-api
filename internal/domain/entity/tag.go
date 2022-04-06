@@ -9,6 +9,8 @@ type Tag struct {
 	Excerpt         null.String `json:"excerpt" db:"excerpt"`
 	MetaTitle       null.String `json:"meta_title" db:"meta_title"`
 	MetaDescription null.String `json:"meta_description" db:"meta_description"`
+	OrderNum        null.Int    `json:"order_num,omitempty"`
+	Url             null.String `json:"url"`
 
 	MediaID null.Int `json:"-" db:"media_id"`
 

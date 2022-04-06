@@ -119,6 +119,7 @@ func Init() {
 		TagRepo:          &tagRepo,
 		PostDetailRepo:   &postDetailRepo,
 		MediaRepo:        &mediaRepo,
+		LinkoutRepo:      &linkoutRepo,
 	}
 	keywordMongoApp := application.KeywordApp{
 		KeywordRepo: &keywordMongoRepo,
@@ -172,6 +173,7 @@ func Init() {
 	}
 
 	v1.GET("/:pageSlug", NewPageHandler(pageApp).GetPageBySlugHandler)
+	v1.GET("/:categorySlug/:authorUsername/:postSlug", NewPublishedPostHandler(publishedPostApp).GetDetailArticleHandler)
 
 	e.Logger.Fatal(e.Start(":8000"))
 }
