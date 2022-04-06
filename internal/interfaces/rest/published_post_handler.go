@@ -9,10 +9,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type PublishedPostHandlerInterface interface {
-	GetMostPopularPostHandler()
-}
-
 type PublishedPostHandler struct {
 	PublishedPostApp application.PublishedPostApp
 }
@@ -47,4 +43,17 @@ func (handler PublishedPostHandler) GetRelatedArticlesHandler(c echo.Context) er
 	}
 
 	return c.JSON(http.StatusOK, SuccessResponse(postList))
+}
+
+func (handler *PublishedPostHandler) GetDetailArticleHandler(c echo.Context) error {
+	categorySlug := c.Param("categorySlug")
+	authorUsername := c.Param("authorUsername")
+	postSlug := c.Param("postSlug")
+
+	post, err := handler.PublishedPostApp.GetPostDetails(categorySlug, authorUsername, postSlug)
+	if err != nil {
+		panic(err)
+	}
+
+	return c.JSON(http.StatusOK, SuccessResponse(post))
 }

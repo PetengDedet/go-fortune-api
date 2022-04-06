@@ -3,6 +3,7 @@ package mysql
 import (
 	"github.com/PetengDedet/fortune-post-api/internal/domain/entity"
 	"github.com/jmoiron/sqlx"
+	"gopkg.in/guregu/null.v4"
 )
 
 type TagRepo struct {
@@ -113,4 +114,36 @@ func (repo *TagRepo) GetPostIdsByTagId(id int64) ([]int64, error) {
 	}
 
 	return postIds, nil
+}
+
+func (repo *TagRepo) GetTagsByPostId(postId int64) ([]entity.Tag, error) {
+	query := `
+		SELECT
+			t.name,
+			t.slug,
+			pt.order_num
+		FROM post_tags pt
+		INNER JOIN tags t ON pt.tag_id = t.id
+		WHERE pt.post_id = ?
+		ORDER BY pt.order_num
+	`
+	rows, err := repo.DB.Query(query, postId)
+	if err != nil {
+		return nil, err
+	}
+
+	var tags []entity.Tag
+	for rows.Next() {
+		var t entity.Tag
+		err := rows.Scan(&t.Name, &t.Slug, &t.OrderNum)
+		if err != nil {
+			panic(err)
+		}
+
+		t.Url = null.StringFrom("/tag/" + t.Slug)
+
+		tags = append(tags, t)
+	}
+
+	return tags, nil
 }

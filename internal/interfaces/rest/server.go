@@ -69,6 +69,12 @@ func Init() {
 	userRepo := mysql.UserRepo{
 		DB: db,
 	}
+	postDetailRepo := mysql.PostDetailRepo{
+		DB: db,
+	}
+	mediaRepo := mysql.MediaRepo{
+		DB: db,
+	}
 
 	// Apps
 	menuApp := application.MenuApp{
@@ -111,6 +117,9 @@ func Init() {
 		UserRepo:         &userRepo,
 		CategoryRepo:     &categoryRepo,
 		TagRepo:          &tagRepo,
+		PostDetailRepo:   &postDetailRepo,
+		MediaRepo:        &mediaRepo,
+		LinkoutRepo:      &linkoutRepo,
 	}
 	keywordMongoApp := application.KeywordApp{
 		KeywordRepo: &keywordMongoRepo,
@@ -164,6 +173,7 @@ func Init() {
 	}
 
 	v1.GET("/:pageSlug", NewPageHandler(pageApp).GetPageBySlugHandler)
+	v1.GET("/:categorySlug/:authorUsername/:postSlug", NewPublishedPostHandler(publishedPostApp).GetDetailArticleHandler)
 
 	e.Logger.Fatal(e.Start(":8000"))
 }

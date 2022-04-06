@@ -97,8 +97,8 @@ func (repo *PublishedPostRepo) GetLatestPublishedPost(limit, skip int) ([]entity
 	for rows.Next() {
 		var p entity.PostList
 		var cover entity.Cover
-		var cat entity.SearchResultCategory
-		var pt entity.SearchResultPostType
+		var cat entity.CategoryList
+		var pt entity.PostTypeList
 		var publishAt string
 		var username *string
 		err := rows.Scan(
@@ -179,8 +179,8 @@ func (repo *PublishedPostRepo) GetPopularPosts() ([]entity.PostList, error) {
 	for rows.Next() {
 		var p entity.PostList
 		var cover entity.Cover
-		var cat entity.SearchResultCategory
-		var pt entity.SearchResultPostType
+		var cat entity.CategoryList
+		var pt entity.PostTypeList
 		var publishAt string
 		var username *string
 		err := rows.Scan(
@@ -263,8 +263,8 @@ func (repo *PublishedPostRepo) GetLatestPublishedPostByCategoryId(limit, skip in
 	for rows.Next() {
 		var p entity.PostList
 		var cover entity.Cover
-		var cat entity.SearchResultCategory
-		var pt entity.SearchResultPostType
+		var cat entity.CategoryList
+		var pt entity.PostTypeList
 		var publishAt string
 		var username *string
 		err := rows.Scan(
@@ -350,8 +350,8 @@ func (repo *PublishedPostRepo) GetLatestPublishedPostByTagId(limit, skip int, ta
 	for rows.Next() {
 		var p entity.PostList
 		var cover entity.Cover
-		var cat entity.SearchResultCategory
-		var pt entity.SearchResultPostType
+		var cat entity.CategoryList
+		var pt entity.PostTypeList
 		var publishAt string
 		var username *string
 		err := rows.Scan(
@@ -437,8 +437,8 @@ func (repo *PublishedPostRepo) GetLatestPublishedPostByCategoryIdAndTagId(limit,
 	for rows.Next() {
 		var p entity.PostList
 		var cover entity.Cover
-		var cat entity.SearchResultCategory
-		var pt entity.SearchResultPostType
+		var cat entity.CategoryList
+		var pt entity.PostTypeList
 		var publishAt string
 		var username *string
 		err := rows.Scan(
@@ -527,8 +527,8 @@ func (repo *PublishedPostRepo) SearchPublishedPostByKeyword(keyword string, limi
 	for rows.Next() {
 		var p entity.PostList
 		var cover entity.Cover
-		var cat entity.SearchResultCategory
-		var pt entity.SearchResultPostType
+		var cat entity.CategoryList
+		var pt entity.PostTypeList
 		var publishAt string
 		var rel *string
 		var lessRel *string
@@ -597,4 +597,112 @@ func formatKeyword(keyword string) (relevant, lessRelevant string) {
 	lessRelevant = "'+(" + lessRelevant + ")'"
 
 	return relevant, lessRelevant
+}
+
+func (repo *PublishedPostRepo) GetPublishedPostDetail(categorySlug, authorUsername, postSlug string) (*entity.PublishedPost, error) {
+	query := `
+		SELECT
+			pp.id, 
+			pp.title,
+			pp.description,
+			pp.slug,
+			pp.publish_at,
+			pp.is_csc,
+			pp.post_type_id,
+			pp.category_id,
+			pp.cover_media_id,
+			pp.created_by,
+			pp.excerpt,
+			pp.meta_title,
+			pp.meta_description,
+			m.url_media,
+			m.source_name,
+			m.source_url,
+			m.description,
+			m.width,
+			m.height,
+			m.url_embed,
+			c.name,
+			c.slug,
+			pt.name,
+			pt.slug,
+			u.username,
+			cp.name,
+			cp.slug
+		FROM published_posts pp
+			INNER JOIN post_types pt ON pp.post_type_id = pt.id
+			INNER JOIN categories c ON pp.category_id = c.id
+			INNER JOIN medias m ON pp.cover_media_id = m.id
+			INNER JOIN users u ON pp.created_by = u.id
+			LEFT JOIN campaigns cp ON cp.id = pp.campaign_id
+		WHERE c.slug = ?
+			AND u.username = ?
+			AND pp.slug = ?
+		LIMIT 1
+	`
+
+	rows, err := repo.DB.Query(query, categorySlug, authorUsername, postSlug)
+	if err != nil {
+		return nil, err
+	}
+
+	var p entity.PublishedPost
+	for rows.Next() {
+		var cover entity.Cover
+		var cat entity.CategoryList
+		var pt entity.PostTypeList
+		var campaign entity.Campaign
+		var publishAt string
+		var username *string
+		err := rows.Scan(
+			&p.ID,
+			&p.Title,
+			&p.Description,
+			&p.Slug,
+			&publishAt,
+			&p.IsCSC,
+			&p.PostTypeID,
+			&p.CategoryID,
+			&p.CoverMediaID,
+			&p.CreatorID,
+			&p.Excerpt,
+			&p.MetaTitle,
+			&p.MetaDescription,
+			&cover.UrlMedia,
+			&cover.SourceName,
+			&cover.SourceUrl,
+			&cover.Description,
+			&cover.Width,
+			&cover.Height,
+			&cover.EmbedVideo,
+			&cat.Name,
+			&cat.Slug,
+			&pt.Name,
+			&pt.Slug,
+			&username,
+			&campaign.Name,
+			&campaign.Slug,
+		)
+
+		if err != nil {
+			panic(err.Error())
+		}
+
+		cat.Url = "/" + cat.Slug
+		p.Category = &cat
+
+		p.Cover = cover.GetPredefinedSize()
+		p.PostType = &pt
+		p.Campaign = &campaign
+
+		t, err := time.Parse(time.RFC3339, publishAt)
+		if err != nil {
+			panic(err)
+		}
+		p.ReleaseDate = t.Unix()
+
+		p.ArticleUrl = "/" + cat.Slug + "/" + *username + "/" + p.Slug
+	}
+
+	return &p, nil
 }

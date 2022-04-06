@@ -37,7 +37,7 @@ func (s *Section) SetSectionAttributes() *Section {
 	s.setBaseUrl()
 
 	if s.Media != nil {
-		s.ImageUrl = s.Media.SetUrl(600, 600).Url
+		s.ImageUrl = s.Media.SetUrl("600", "600").Url
 	}
 
 	return s

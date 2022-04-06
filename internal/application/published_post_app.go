@@ -6,17 +6,17 @@ import (
 
 	"github.com/PetengDedet/fortune-post-api/internal/domain/entity"
 	"github.com/PetengDedet/fortune-post-api/internal/domain/repository"
+	"gopkg.in/guregu/null.v4"
 )
-
-type PublishedPostAppInterface interface {
-	GetMostPopularPosts() ([]entity.PostList, error)
-}
 
 type PublishedPostApp struct {
 	PublishePostRepo repository.PublishedPostRepository
 	UserRepo         repository.UserRepository
 	TagRepo          repository.TagRepository
 	CategoryRepo     repository.CategoryRepository
+	PostDetailRepo   repository.PostDetailRepository
+	MediaRepo        repository.MediaRepository
+	LinkoutRepo      repository.LinkoutRepository
 }
 
 func (app *PublishedPostApp) GetMostPopularPosts() ([]entity.PostList, error) {
@@ -126,6 +126,54 @@ func (app *PublishedPostApp) GeRelatedPosts(page, tagSlug, categorySlug string) 
 	pl = mapAuthorToPost(pl, authors)
 
 	return pl, e
+}
+
+func (app *PublishedPostApp) GetPostDetails(categorySlug, authorUsername, postSlug string) (*entity.PublishedPost, error) {
+	post, err := app.PublishePostRepo.GetPublishedPostDetail(categorySlug, authorUsername, postSlug)
+	if err != nil {
+		return nil, err
+	}
+
+	tags, err := app.TagRepo.GetTagsByPostId(post.ID)
+	if err != nil {
+		return nil, err
+	}
+	post.Tags = tags
+
+	authors, err := app.UserRepo.GetAuthorsByPostId(post.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	for i, a := range authors {
+		authors[i] = *a.SetAvatar()
+	}
+
+	post.Author = authors
+
+	postDetail, err := app.PostDetailRepo.GetPostDetailsByPostId(post.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	linkouts, err := app.LinkoutRepo.GetLinkoutsByType("article")
+	if err != nil {
+		return nil, err
+	}
+
+	for i, pd := range postDetail {
+		if pd.Type.String != "cover" && pd.Type.String != "image" {
+			postDetail[i].Value.String = entity.ParseDescription(pd.Value.String, post.Title, linkouts)
+			continue
+		}
+
+		postDetail[i].Value = null.String{}
+	}
+
+	post.Description.String = entity.ParseDescription(post.Description.String, post.Title, linkouts)
+	post.PostDetails = postDetail
+
+	return post, nil
 }
 
 func mapAuthorToPost(posts []entity.PostList, authors []entity.Author) []entity.PostList {
