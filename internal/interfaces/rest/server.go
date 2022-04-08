@@ -66,6 +66,9 @@ func Init() {
 	publishedPostRepo := mysql.PublishedPostRepo{
 		DB: db,
 	}
+	postRepo := mysql.PostRepo{
+		DB: db,
+	}
 	userRepo := mysql.UserRepo{
 		DB: db,
 	}
@@ -114,6 +117,7 @@ func Init() {
 	}
 	publishedPostApp := application.PublishedPostApp{
 		PublishePostRepo: &publishedPostRepo,
+		PostRepo:         &postRepo,
 		UserRepo:         &userRepo,
 		CategoryRepo:     &categoryRepo,
 		TagRepo:          &tagRepo,
@@ -173,6 +177,7 @@ func Init() {
 	}
 
 	v1.GET("/:pageSlug", NewPageHandler(pageApp).GetPageBySlugHandler)
+	v1.GET("/:categorySlug/amp/:authorUsername/:postSlug", NewPublishedPostHandler(publishedPostApp).GetAMPDetailArticleHandler)
 	v1.GET("/:categorySlug/:authorUsername/:postSlug", NewPublishedPostHandler(publishedPostApp).GetDetailArticleHandler)
 
 	e.Logger.Fatal(e.Start(":8000"))

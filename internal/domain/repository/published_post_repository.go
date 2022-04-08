@@ -1,6 +1,10 @@
 package repository
 
-import "github.com/PetengDedet/fortune-post-api/internal/domain/entity"
+import (
+	"time"
+
+	"github.com/PetengDedet/fortune-post-api/internal/domain/entity"
+)
 
 type PublishedPostRepository interface {
 	GetPublishedPostCountByCategoryId(catId int64) (int64, error)
@@ -13,4 +17,5 @@ type PublishedPostRepository interface {
 	GetLatestPublishedPostByCategoryIdAndTagId(limit, skip int, categoryId, tagId int64) ([]entity.PostList, error)
 	GetPopularPosts() ([]entity.PostList, error)
 	GetPublishedPostDetail(categorySlug, authorUsername, postSlug string) (*entity.PublishedPost, error)
+	IncrementVisitCount(postId int64, updatedAt *time.Time) error
 }

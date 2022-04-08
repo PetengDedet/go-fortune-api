@@ -3,6 +3,7 @@ package application
 import (
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/PetengDedet/fortune-post-api/internal/domain/entity"
 	"github.com/PetengDedet/fortune-post-api/internal/domain/repository"
@@ -11,6 +12,7 @@ import (
 
 type PublishedPostApp struct {
 	PublishePostRepo repository.PublishedPostRepository
+	PostRepo         repository.PostRepository
 	UserRepo         repository.UserRepository
 	TagRepo          repository.TagRepository
 	CategoryRepo     repository.CategoryRepository
@@ -172,6 +174,85 @@ func (app *PublishedPostApp) GetPostDetails(categorySlug, authorUsername, postSl
 
 	post.Description.String = entity.ParseDescription(post.Description.String, post.Title, linkouts)
 	post.PostDetails = postDetail
+
+	// Update visited count
+	now := time.Now()
+	if err := app.PublishePostRepo.IncrementVisitCount(post.ID, &now); err != nil {
+		panic(err)
+	}
+
+	if err := app.PostRepo.IncrementVisitCount(post.ID, &now); err != nil {
+		panic(err)
+	}
+
+	return post, nil
+}
+
+func (app *PublishedPostApp) GetAMPPostDetails(categorySlug, authorUsername, postSlug string) (*entity.PublishedPost, error) {
+	post, err := app.PublishePostRepo.GetPublishedPostDetail(categorySlug, authorUsername, postSlug)
+	if err != nil {
+		return nil, err
+	}
+
+	tags, err := app.TagRepo.GetTagsByPostId(post.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(tags) <= 0 {
+		tags = []entity.Tag{}
+	}
+
+	post.Tags = tags
+
+	authors, err := app.UserRepo.GetAuthorsByPostId(post.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	for i, a := range authors {
+		authors[i] = *a.SetAvatar()
+	}
+
+	post.Author = authors
+
+	postDetail, err := app.PostDetailRepo.GetPostDetailsByPostId(post.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	linkouts, err := app.LinkoutRepo.GetLinkoutsByType("article")
+	if err != nil {
+		return nil, err
+	}
+
+	for i, pd := range postDetail {
+		if pd.Type.String != "cover" && pd.Type.String != "image" {
+			val := entity.ParseDescription(pd.Value.String, post.Title, linkouts)
+			val = entity.AdjustAMPDescription(val)
+
+			postDetail[i].Value.String = val
+			postDetail[i].Embeds = entity.GetAMPEmbedsType(val)
+
+			continue
+		}
+
+		postDetail[i].Value = null.String{}
+	}
+
+	parsedDescription := entity.ParseDescription(post.Description.String, post.Title, linkouts)
+	post.Description.String = entity.AdjustAMPDescription(parsedDescription)
+	post.PostDetails = postDetail
+
+	// Update visited count
+	now := time.Now()
+	if err := app.PublishePostRepo.IncrementVisitCount(post.ID, &now); err != nil {
+		panic(err)
+	}
+
+	if err := app.PostRepo.IncrementVisitCount(post.ID, &now); err != nil {
+		panic(err)
+	}
 
 	return post, nil
 }
