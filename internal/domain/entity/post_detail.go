@@ -7,4 +7,5 @@ type PostDetailList struct {
 	OrderNum int64       `json:"order_num"`
 	Value    null.String `json:"value"`
 	Cover    *Cover      `json:"cover,omitempty"`
+	Embeds   []string    `json:"embeds,omitempty"`
 }

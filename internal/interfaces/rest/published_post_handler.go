@@ -57,3 +57,16 @@ func (handler *PublishedPostHandler) GetDetailArticleHandler(c echo.Context) err
 
 	return c.JSON(http.StatusOK, SuccessResponse(post))
 }
+
+func (handler *PublishedPostHandler) GetAMPDetailArticleHandler(c echo.Context) error {
+	categorySlug := c.Param("categorySlug")
+	authorUsername := c.Param("authorUsername")
+	postSlug := c.Param("postSlug")
+
+	post, err := handler.PublishedPostApp.GetAMPPostDetails(categorySlug, authorUsername, postSlug)
+	if err != nil {
+		panic(err)
+	}
+
+	return c.JSON(http.StatusOK, SuccessResponse(post))
+}
