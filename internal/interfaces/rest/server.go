@@ -79,6 +79,9 @@ func Init() {
 	mediaRepo := mysql.MediaRepo{
 		DB: db,
 	}
+	magazineRepo := mysql.MagazineRepo{
+		DB: db,
+	}
 
 	// Apps
 	menuApp := application.MenuApp{
@@ -133,6 +136,9 @@ func Init() {
 	keywordApp := application.KeywordApp{
 		KeywordRepo: &keywordRepo,
 	}
+	magazineApp := application.MagazineApp{
+		MagazineRepo: &magazineRepo,
+	}
 
 	// Echo instance
 	e := echo.New()
@@ -159,6 +165,7 @@ func Init() {
 	v1.GET("/content-type/:postTypeSlug", NewPostTypeHandler(postTypeApp, pageApp).GetPostTypePageHandler)
 	v1.GET("/most-popular", NewPublishedPostHandler(publishedPostApp).GetMostPopularPostHandler)
 	v1.GET("/related-articles", NewPublishedPostHandler(publishedPostApp).GetRelatedArticlesHandler)
+	v1.GET("/magazines", NewMagazineHandler(magazineApp).GetLatestHomepageMagazines)
 	v1.GET("/latest", NewPublishedPostHandler(publishedPostApp).GetLatestArticleHandler)
 	v1.GET("/latest/homepage/tag/:tagSlug", NewPublishedPostHandler(publishedPostApp).GetLatestArticleHomepageByTagHandler)
 	v1.GET("/latest/homepage/content-type/:contentTypeSlug", NewPublishedPostHandler(publishedPostApp).GetLatestArticleHomepageByContentTypeHandler)
