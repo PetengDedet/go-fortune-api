@@ -257,6 +257,63 @@ func (app *PublishedPostApp) GetAMPPostDetails(categorySlug, authorUsername, pos
 	return post, nil
 }
 
+func (app *PublishedPostApp) GetLatestPost(page int) (pl []entity.PostList, e error) {
+	perPage1, err := strconv.Atoi(os.Getenv("LATEST_HOMEPAGE_MAIN_PER_PAGE_1"))
+	if err != nil {
+		perPage1 = 12
+	}
+
+	perPage2, err := strconv.Atoi(os.Getenv("LATEST_HOMEPAGE_MAIN_PER_PAGE_2"))
+	if err != nil {
+		perPage2 = 9
+	}
+
+	maxPage, err := strconv.Atoi(os.Getenv("LATEST_HOMEPAGE_MAIN_MAX_PAGE"))
+	if err != nil {
+		maxPage = 10
+	}
+
+	if page == 0 {
+		page = 1
+	}
+
+	if page > maxPage {
+		page = maxPage
+	}
+
+	take := perPage1
+	skip := 0
+
+	if page > 1 && perPage2 > 0 {
+		skip = take + ((page - 2) * perPage2)
+		take = perPage2
+	}
+
+	posts, err := app.PublishePostRepo.GetLatestPublishedPost(take, skip)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(posts) == 0 {
+		return []entity.PostList{}, nil
+	}
+
+	var postIds []int64
+	for _, p := range posts {
+		postIds = append(postIds, p.ID)
+	}
+
+	authors, err := app.UserRepo.GetAuthorsByPostIds(postIds)
+	if err != nil {
+		panic(err)
+	}
+
+	posts = mapAuthorToPost(posts, authors)
+	pl = posts
+
+	return pl, nil
+}
+
 func mapAuthorToPost(posts []entity.PostList, authors []entity.Author) []entity.PostList {
 	for i, p := range posts {
 		for _, a := range authors {
