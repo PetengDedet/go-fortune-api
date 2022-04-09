@@ -15,6 +15,7 @@ type PublishedPostRepository interface {
 	GetLatestPublishedPostByCategoryId(limit, skip int, categoryId int64) ([]entity.PostList, error)
 	GetLatestPublishedPostByTagId(limit, skip int, tagId int64) ([]entity.PostList, error)
 	GetLatestPublishedPostByCategoryIdAndTagId(limit, skip int, categoryId, tagId int64) ([]entity.PostList, error)
+	GetLatestPublishedPostByPostTypeId(limit, skip int, postTypeId int64) ([]entity.PostList, error)
 	GetPopularPosts() ([]entity.PostList, error)
 	GetPublishedPostDetail(categorySlug, authorUsername, postSlug string) (*entity.PublishedPost, error)
 	IncrementVisitCount(postId int64, updatedAt *time.Time) error

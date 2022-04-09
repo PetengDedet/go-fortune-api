@@ -19,6 +19,7 @@ type PublishedPostApp struct {
 	PostDetailRepo   repository.PostDetailRepository
 	MediaRepo        repository.MediaRepository
 	LinkoutRepo      repository.LinkoutRepository
+	PostTypeRepo     repository.PostTypeRepository
 }
 
 func (app *PublishedPostApp) GetMostPopularPosts() ([]entity.PostList, error) {
@@ -326,6 +327,42 @@ func (app *PublishedPostApp) GetLatestPostByTagSLug(tagSlug string) (pl []entity
 	}
 
 	posts, err := app.PublishePostRepo.GetLatestPublishedPostByTagId(take, 0, tag.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(posts) == 0 {
+		return []entity.PostList{}, nil
+	}
+
+	var postIds []int64
+	for _, p := range posts {
+		postIds = append(postIds, p.ID)
+	}
+
+	authors, err := app.UserRepo.GetAuthorsByPostIds(postIds)
+	if err != nil {
+		panic(err)
+	}
+
+	posts = mapAuthorToPost(posts, authors)
+	pl = posts
+
+	return pl, nil
+}
+
+func (app *PublishedPostApp) GetLatestPostByContentTypeSLug(contentTypeSlug string) (pl []entity.PostList, e error) {
+	take, err := strconv.Atoi(os.Getenv("LATEST_HOMEPAGE_CONTENT_TYPE_PER_PAGE"))
+	if err != nil {
+		take = 6
+	}
+
+	contentType, err := app.PostTypeRepo.GetPostTypeBySlug(contentTypeSlug)
+	if err != nil {
+		return nil, err
+	}
+
+	posts, err := app.PublishePostRepo.GetLatestPublishedPostByPostTypeId(take, 0, contentType.ID)
 	if err != nil {
 		return nil, err
 	}
