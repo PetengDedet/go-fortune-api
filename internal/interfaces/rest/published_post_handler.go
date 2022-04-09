@@ -104,9 +104,9 @@ func (handler *PublishedPostHandler) GetLatestArticleHomepageByTagHandler(c echo
 	return c.JSON(http.StatusOK, SuccessResponse(postList))
 }
 
-func (handler *PublishedPostHandler) GetLatestArticleByContentTypeHandler(c echo.Context) error {
+func (handler *PublishedPostHandler) GetLatestArticleHomepageByContentTypeHandler(c echo.Context) error {
 	contentTypeSlug := c.Param("contentTypeSlug")
-	postList, err := handler.PublishedPostApp.GetLatestPostByContentTypeSLug(contentTypeSlug)
+	postList, err := handler.PublishedPostApp.GetLatestPostHomepageByContentTypeSLug(contentTypeSlug)
 	if err != nil {
 		if errors.Is(err, &common.NotFoundError{}) {
 			return c.JSON(http.StatusNotFound, NotFoundResponse(nil))
@@ -126,6 +126,25 @@ func (handler *PublishedPostHandler) GetLatestArticleByTagHandler(c echo.Context
 
 	tagSlug := c.Param("tagSlug")
 	postList, err := handler.PublishedPostApp.GetLatestPostByTagSLug(tagSlug, page)
+	if err != nil {
+		if errors.Is(err, &common.NotFoundError{}) {
+			return c.JSON(http.StatusNotFound, NotFoundResponse(nil))
+		}
+
+		return c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
+	}
+
+	return c.JSON(http.StatusOK, SuccessResponse(postList))
+}
+
+func (handler *PublishedPostHandler) GetLatestArticleByContentTypeHandler(c echo.Context) error {
+	page, err := strconv.Atoi(c.QueryParam("page"))
+	if err != nil {
+		page = 1
+	}
+
+	contentTypeSlug := c.Param("contentTypeSlug")
+	postList, err := handler.PublishedPostApp.GetLatestPostByContentTypeSLug(contentTypeSlug, page)
 	if err != nil {
 		if errors.Is(err, &common.NotFoundError{}) {
 			return c.JSON(http.StatusNotFound, NotFoundResponse(nil))
