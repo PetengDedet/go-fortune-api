@@ -311,6 +311,90 @@ func (repo *PublishedPostRepo) GetLatestPublishedPostByCategoryId(limit, skip in
 	return pl, nil
 }
 
+func (repo *PublishedPostRepo) GetLatestPublishedPostByPostTypeId(limit, skip int, postTypeId int64) ([]entity.PostList, error) {
+	query := `
+		SELECT
+			pp.id, 
+			pp.title,
+			pp.slug,
+			pp.publish_at,
+			pp.is_csc,
+			pp.post_type_id,
+			pp.category_id,
+			pp.cover_media_id,
+			pp.created_by,
+			pp.excerpt,
+			m.url_media,
+			c.name,
+			c.slug,
+			pt.name,
+			pt.slug,
+			u.username
+		FROM published_posts pp
+			INNER JOIN post_types pt ON pp.post_type_id = pt.id
+			INNER JOIN categories c ON pp.category_id = c.id
+			INNER JOIN medias m ON pp.cover_media_id = m.id
+			INNER JOIN users u ON pp.created_by = u.id
+		WHERE pp.post_type_id = ?
+		ORDER BY pp.publish_at DESC
+		LIMIT ? OFFSET ?
+	`
+
+	rows, err := repo.DB.Query(query, postTypeId, limit, skip)
+	if err != nil {
+		return nil, err
+	}
+
+	var pl []entity.PostList
+	for rows.Next() {
+		var p entity.PostList
+		var cover entity.Cover
+		var cat entity.CategoryList
+		var pt entity.PostTypeList
+		var publishAt string
+		var username *string
+		err := rows.Scan(
+			&p.ID,
+			&p.Title,
+			&p.Slug,
+			&publishAt,
+			&p.IsCSC,
+			&p.PostTypeID,
+			&p.CategoryID,
+			&p.CoverMediaID,
+			&p.CreatorID,
+			&p.Excerpt,
+			&cover.UrlMedia,
+			&cat.Name,
+			&cat.Slug,
+			&pt.Name,
+			&pt.Slug,
+			&username,
+		)
+
+		if err != nil {
+			panic(err)
+		}
+
+		cat.Url = "/" + cat.Slug
+		p.Category = &cat
+		p.Cover = cover.GetPredefinedSize()
+		p.PostType = &pt
+
+		t, err := time.Parse(time.RFC3339, publishAt)
+		if err != nil {
+			panic(err)
+		}
+		p.ReleaseDate = t.Unix()
+
+		p.ArticleUrl = "/" + cat.Slug + "/" + *username + "/" + p.Slug
+
+		pl = append(pl, p)
+	}
+
+	return pl, nil
+}
+
 func (repo *PublishedPostRepo) GetLatestPublishedPostByTagId(limit, skip int, tagId int64) ([]entity.PostList, error) {
 	query := `
 		SELECT
