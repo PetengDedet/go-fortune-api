@@ -155,3 +155,22 @@ func (handler *PublishedPostHandler) GetLatestArticleByContentTypeHandler(c echo
 
 	return c.JSON(http.StatusOK, SuccessResponse(postList))
 }
+
+func (handler *PublishedPostHandler) GetLatestArticleByCategoryHandler(c echo.Context) error {
+	page, err := strconv.Atoi(c.QueryParam("page"))
+	if err != nil {
+		page = 1
+	}
+
+	categorySlug := c.Param("categorySlug")
+	postList, err := handler.PublishedPostApp.GetLatestPostByCategorySLug(categorySlug, page)
+	if err != nil {
+		if errors.Is(err, &common.NotFoundError{}) {
+			return c.JSON(http.StatusNotFound, NotFoundResponse(nil))
+		}
+
+		return c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
+	}
+
+	return c.JSON(http.StatusOK, SuccessResponse(postList))
+}

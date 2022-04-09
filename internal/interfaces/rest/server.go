@@ -164,6 +164,7 @@ func Init() {
 	v1.GET("/latest/homepage/content-type/:contentTypeSlug", NewPublishedPostHandler(publishedPostApp).GetLatestArticleHomepageByContentTypeHandler)
 	v1.GET("/latest/tag/:tagSlug", NewPublishedPostHandler(publishedPostApp).GetLatestArticleByTagHandler)
 	v1.GET("/latest/content-type/:contentTypeSlug", NewPublishedPostHandler(publishedPostApp).GetLatestArticleByContentTypeHandler)
+	v1.GET("/latest/category/:categorySlug", NewPublishedPostHandler(publishedPostApp).GetLatestArticleByCategoryHandler)
 
 	v1.GET("/:pageSlug", NewPageHandler(pageApp).GetPageBySlugHandler)
 	v1.GET("/:categorySlug/amp/:authorUsername/:postSlug", NewPublishedPostHandler(publishedPostApp).GetAMPDetailArticleHandler)
