@@ -314,6 +314,42 @@ func (app *PublishedPostApp) GetLatestPost(page int) (pl []entity.PostList, e er
 	return pl, nil
 }
 
+func (app *PublishedPostApp) GetLatestPostByTagSLug(tagSlug string) (pl []entity.PostList, e error) {
+	take, err := strconv.Atoi(os.Getenv("LATEST_HOMEPAGE_TAG_PER_PAGE"))
+	if err != nil {
+		take = 6
+	}
+
+	tag, err := app.TagRepo.GetTagBySlug(tagSlug)
+	if err != nil {
+		return nil, err
+	}
+
+	posts, err := app.PublishePostRepo.GetLatestPublishedPostByTagId(take, 0, tag.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(posts) == 0 {
+		return []entity.PostList{}, nil
+	}
+
+	var postIds []int64
+	for _, p := range posts {
+		postIds = append(postIds, p.ID)
+	}
+
+	authors, err := app.UserRepo.GetAuthorsByPostIds(postIds)
+	if err != nil {
+		panic(err)
+	}
+
+	posts = mapAuthorToPost(posts, authors)
+	pl = posts
+
+	return pl, nil
+}
+
 func mapAuthorToPost(posts []entity.PostList, authors []entity.Author) []entity.PostList {
 	for i, p := range posts {
 		for _, a := range authors {

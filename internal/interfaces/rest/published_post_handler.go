@@ -89,3 +89,17 @@ func (handler *PublishedPostHandler) GetLatestArticleHandler(c echo.Context) err
 
 	return c.JSON(http.StatusOK, SuccessResponse(postList))
 }
+
+func (handler *PublishedPostHandler) GetLatestArticleByTagHandler(c echo.Context) error {
+	tagSlug := c.Param("tagSlug")
+	postList, err := handler.PublishedPostApp.GetLatestPostByTagSLug(tagSlug)
+	if err != nil {
+		if errors.Is(err, &common.NotFoundError{}) {
+			return c.JSON(http.StatusNotFound, NotFoundResponse(nil))
+		}
+
+		return c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
+	}
+
+	return c.JSON(http.StatusOK, SuccessResponse(postList))
+}
