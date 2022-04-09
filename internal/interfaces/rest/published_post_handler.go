@@ -3,6 +3,7 @@ package rest
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/PetengDedet/fortune-post-api/internal/application"
 	"github.com/PetengDedet/fortune-post-api/internal/common"
@@ -69,4 +70,22 @@ func (handler *PublishedPostHandler) GetAMPDetailArticleHandler(c echo.Context) 
 	}
 
 	return c.JSON(http.StatusOK, SuccessResponse(post))
+}
+
+func (handler *PublishedPostHandler) GetLatestArticleHandler(c echo.Context) error {
+	page, err := strconv.Atoi(c.QueryParam("page"))
+	if err != nil {
+		page = 1
+	}
+
+	postList, err := handler.PublishedPostApp.GetLatestPost(page)
+	if err != nil {
+		if errors.Is(err, &common.NotFoundError{}) {
+			return c.JSON(http.StatusNotFound, NotFoundResponse(nil))
+		}
+
+		return c.JSON(http.StatusInternalServerError, InternalErrorResponse(nil))
+	}
+
+	return c.JSON(http.StatusOK, SuccessResponse(postList))
 }
